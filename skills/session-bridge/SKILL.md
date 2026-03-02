@@ -56,6 +56,14 @@ Collect from the current session:
 - Tasks completed, in-progress, and blocked
 - A one-paragraph summary of what this session accomplished
 
+**Python project context** (if `pyproject.toml` or `setup.py` detected):
+- Python version (from `.python-version`, `pyproject.toml` `requires-python`, or `python --version`)
+- Virtual environment path and type (venv, poetry, uv, conda)
+- Installed optional dependency groups (e.g., `[dev]`, `[test]`, `[embeddings]`)
+- Last mypy error count (from most recent verification run, if available)
+- Last test coverage percentage (from most recent test run, if available)
+- DB migration version (if alembic, django migrations, or similar detected)
+
 #### Step 2 — Update .rune/decisions.md
 
 Use `Glob` to check if `.rune/decisions.md` exists. If not, use `Write` to create it with a `# Decisions Log` header.
@@ -85,6 +93,15 @@ For each pattern or convention established, use `Edit` to append to `.rune/conve
 **Applies to:** Where this convention should be followed
 ```
 
+Python example:
+```markdown
+## [YYYY-MM-DD] Convention: Async-First I/O
+
+**Pattern:** All I/O functions use `async def`; blocking calls (`requests`, `open`, `time.sleep`) are forbidden in async modules
+**Example:** `async def fetch_data(): async with httpx.AsyncClient() as client: ...`
+**Applies to:** All modules in `src/` — sync wrappers only in CLI entry points
+```
+
 #### Step 4 — Update .rune/progress.md
 
 Use `Glob` to check if `.rune/progress.md` exists. If not, use `Write` to create it with a `# Progress` header.
@@ -106,6 +123,13 @@ Use `Edit` to append the current task status to `.rune/progress.md`:
 **Next Session Should:**
 - Start with X
 - Continue Y from step Z
+
+**Python Context** (if Python project):
+- Python: [version] ([venv type])
+- Installed extras: [list of optional dependency groups]
+- mypy: [error count] ([strict/normal])
+- Coverage: [percentage]%
+- Migration: [version or N/A]
 ```
 
 #### Step 5 — Update .rune/session-log.md

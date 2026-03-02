@@ -3,7 +3,7 @@ name: context-engine
 description: Context window management. Detects when context is filling up, triggers smart compaction, and preserves critical information across compaction boundaries.
 metadata:
   author: runedev
-  version: "0.2.0"
+  version: "0.3.0"
   layer: L3
   model: haiku
   group: state
@@ -32,32 +32,44 @@ Context window management for long sessions. Detects when context is approaching
 
 ## Execution
 
-### Step 1 — Assess context
+### Step 1 — Count tool calls
 
-Estimate current context usage based on conversation length:
+Count total tool calls made so far in this session. This is the ONLY reliable metric — token usage is not exposed by Claude Code and any estimate will be dangerously inaccurate.
 
-- Count total tool calls made so far in this session
-- Estimate tokens consumed: each tool call ≈ 500-2000 tokens (read = low, bash = medium, write = high)
-- Add approximate tokens from user/assistant message history
-
-Produce a utilization estimate as a percentage of the model's context window (200K tokens for Claude Sonnet/Opus, 32K for Haiku).
+Do NOT attempt to estimate token percentages. Tool count is a directional proxy, not a precise measurement.
 
 ### Step 2 — Classify health
 
-Map utilization to health level:
+Map tool call count to health level:
 
 ```
-GREEN   (<50%)    — Healthy, continue normally
-YELLOW  (50-70%)  — Load only essential files going forward
-ORANGE  (70-85%)  — Recommend /compact at next logical boundary
-RED     (>85%)    — Trigger immediate compaction, save state first
+GREEN   (<50 calls)    — Healthy, continue normally
+YELLOW  (50-80 calls)  — Load only essential files going forward
+ORANGE  (80-120 calls) — Recommend /compact at next logical boundary
+RED     (>120 calls)   — Trigger immediate compaction, save state first
 ```
+
+These thresholds are directional heuristics, not precise limits. Sessions with many large file reads may hit context limits earlier; sessions with mostly Grep/Glob may go longer.
+
+#### Large-File Adjustment
+
+Projects with large source files (Python modules often 500-1500 LOC, Java files similarly) consume significantly more context per `Read` call. If the session has read files averaging >500 lines, apply a 0.8x multiplier to all thresholds:
+
+```
+Adjusted thresholds (large-file sessions):
+GREEN   (<40 calls)    — Healthy, continue normally
+YELLOW  (40-65 calls)  — Load only essential files going forward
+ORANGE  (65-100 calls) — Recommend /compact at next logical boundary
+RED     (>100 calls)   — Trigger immediate compaction, save state first
+```
+
+Detection: count `Read` tool calls that returned >500 lines. If ≥3 such calls → activate large-file thresholds for the remainder of the session.
 
 ### Step 3 — If YELLOW
 
 Emit advisory to the calling orchestrator:
 
-> "Context at [X]%. Load only essential files. Avoid reading full files when Grep will do."
+> "[X] tool calls. Load only essential files. Avoid reading full files when Grep will do."
 
 Do NOT trigger compaction yet. Continue execution.
 
@@ -65,7 +77,7 @@ Do NOT trigger compaction yet. Continue execution.
 
 Emit recommendation to the calling orchestrator:
 
-> "Context at [X]%. Recommend /compact at next phase boundary (after current module completes)."
+> "[X] tool calls. Recommend /compact at next phase boundary (after current module completes)."
 
 Identify the next safe boundary (end of current loop iteration, end of current file being processed) and flag it.
 
@@ -81,7 +93,7 @@ Pass to session-bridge:
 
 After session-bridge confirms save, emit:
 
-> "Context CRITICAL ([X]%). State saved to .rune/. Run /compact now."
+> "Context CRITICAL ([X] tool calls, likely near limit). State saved to .rune/. Run /compact now."
 
 Block further tool calls until compaction is acknowledged.
 
@@ -92,20 +104,22 @@ Emit the context health report to the calling skill.
 ## Context Health Levels
 
 ```
-GREEN   (0-50%)   — Healthy, continue normally
-YELLOW  (50-70%)  — Load only essential files
-ORANGE  (70-85%)  — Recommend /compact at next logical boundary
-RED     (85%+)    — Save state NOW via session-bridge, compact immediately
+GREEN   (<50 calls)    — Healthy, continue normally
+YELLOW  (50-80 calls)  — Load only essential files
+ORANGE  (80-120 calls) — Recommend /compact at next logical boundary
+RED     (>120 calls)   — Save state NOW via session-bridge, compact immediately
 ```
+
+Note: These are tool call counts, NOT token percentages. Claude Code does not expose context utilization to skills. Tool count is a directional signal only.
 
 ## Output Format
 
 ```
 ## Context Health
-- **Utilization**: [percentage]
-- **Status**: GREEN | YELLOW | ORANGE | RED
 - **Tool Calls**: [count]
+- **Status**: GREEN | YELLOW | ORANGE | RED
 - **Recommendation**: continue | load-essential-only | compact-at-boundary | compact-immediately
+- **Note**: Tool count is a directional proxy. Check CLI status bar for actual context usage.
 
 ### Critical Context (preserved on compaction)
 - Task: [current task]
@@ -128,17 +142,18 @@ Known failure modes for this skill. Check these before declaring done.
 | Failure Mode | Severity | Mitigation |
 |---|---|---|
 | Triggering compaction without saving state first | CRITICAL | Step 5 (RED): session-bridge MUST run before any compaction — state loss is irreversible |
-| Blocking tool calls when context is ORANGE (not RED) | MEDIUM | ORANGE = recommend only; blocking is only for RED (>85%) |
+| Blocking tool calls when context is ORANGE (not RED) | MEDIUM | ORANGE = recommend only; blocking is only for RED (>120 calls) |
 | Injecting stale context from previous session without marking it historical | HIGH | Constraint 3: all loaded context must include session date marker |
-| Premature compaction from over-estimated utilization | MEDIUM | Token estimates are rough — err conservative; only block at confirmed RED |
+| Premature compaction from over-estimated utilization | MEDIUM | Tool count is directional only — sessions with heavy Read calls may need lower thresholds; only block at confirmed RED |
+| Not activating large-file adjustment on Python/Java codebases | MEDIUM | Track Read calls returning >500 lines; if ≥3 occur, switch to adjusted (0.8x) thresholds for the session |
 
 ## Done When
 
-- Context utilization estimated (tool call count + approximate token math)
-- Health level classified (GREEN / YELLOW / ORANGE / RED)
+- Tool call count captured
+- Health level classified from count thresholds (GREEN / YELLOW / ORANGE / RED)
 - Appropriate advisory emitted matching health level (no advisory for GREEN)
 - If RED: session-bridge called and confirmed saved before compaction signal
-- Context Health Report emitted with utilization %, status, and recommendation
+- Context Health Report emitted with tool count, status, and recommendation
 
 ## Cost Profile
 

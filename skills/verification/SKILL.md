@@ -83,7 +83,11 @@ If tests fail: record which tests failed (first 20), mark as FAIL, continue to b
 Use `Bash`:
 
 - **Node.js**: check `package.json` for `build` script → `npm run build` (fallback: `npx tsc`)
-- **Python**: skip (interpreted) unless `pyproject.toml` has build backend
+- **Python**: check `pyproject.toml` for `[build-system]` section:
+  - If build backend found (setuptools, poetry-core, hatchling, flit-core): `python -m build --no-isolation 2>&1 | head -20` to verify packaging
+  - If `setup.py` exists (legacy): `python setup.py check --strict`
+  - Then always: `pip install -e . --dry-run` to catch broken entry points, missing `__init__.py`, or import path issues
+  - If no `pyproject.toml` and no `setup.py` (scripts-only project): SKIP
 - **Rust**: `cargo build`
 - **Go**: `go build ./...`
 

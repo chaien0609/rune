@@ -74,7 +74,11 @@ THEN: Fast Mode activated
    - What exists already
    - What patterns/conventions the project uses
    - What files will likely need to change
-5. Mark Phase 1 as `completed`
+5. **Python async detection**: If Python project detected (`pyproject.toml` or `setup.py`), use `Grep` for async indicators:
+   - Search for: `async def`, `await`, `aiosqlite`, `aiohttp`, `httpx.AsyncClient`, `asyncio.run`, `trio`
+   - If ≥3 matches across source files → flag project as **"async-first Python"**
+   - Note for later phases: new code should default to `async def`, avoid blocking calls (`requests.get`, `time.sleep`, `open()`)
+6. Mark Phase 1 as `completed`
 
 **Gate**: If scout finds the feature already exists → STOP and inform user.
 
@@ -139,7 +143,11 @@ This phase is lightweight — a Read + pattern match, not a full scan. It does N
    - Use `Write` to create test files
    - Cover the primary use case + edge cases
    - Tests MUST be runnable
-3. Run the tests to verify they FAIL:
+3. **Python async pre-check** (if async-first Python flagged in Phase 1):
+   - Verify `pytest-asyncio` is in project dependencies (`pyproject.toml` or `requirements*.txt`)
+   - Check `pyproject.toml` for `[tool.pytest.ini_options]` → `asyncio_mode = "auto"` — if missing, warn user and suggest adding it before writing async tests
+   - If pytest-asyncio not installed: warn that async tests will silently pass without executing async code
+4. Run the tests to verify they FAIL:
    - Use `Bash` to execute the test command (e.g., `pytest`, `npm test`, `cargo test`)
    - Expected: tests FAIL (red) because implementation doesn't exist yet
 4. Mark Phase 3 as `completed`
@@ -161,6 +169,11 @@ This phase is lightweight — a Read + pattern match, not a full scan. It does N
    - Use `Bash` to run tests
    - If tests pass → continue to next step in plan
    - If tests fail → debug and fix
+   - **Python async checklist** (if async-first Python flagged in Phase 1):
+     - No blocking calls in async functions: `time.sleep()` → `asyncio.sleep()`, `open()` → `aiofiles.open()`, `requests.get()` → `httpx.AsyncClient.get()`
+     - Use `async with` for async context managers (DB connections, HTTP sessions)
+     - Prefer `asyncio.gather()` for parallel I/O operations
+     - Use `asyncio.TaskGroup` (Python 3.11+) for structured concurrency
 4. If stuck on unexpected errors → invoke `rune:debug` (max 3 debug↔fix loops)
 5. All tests MUST pass before proceeding
 6. Mark Phase 4 as `completed`

@@ -50,7 +50,8 @@ project/
 ### Step 1 — Full Scan
 Invoke `rune:scout` on the project root. Collect:
 - Top-level directory structure (depth 2)
-- All config files: `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `composer.json`, `.nvmrc`, `.python-version`
+- All config files: `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `composer.json`, `.nvmrc`, `.python-version`, `Pipfile.lock`, `poetry.lock`, `uv.lock`
+- Python environment markers: `.venv/`, `venv/`, `conda-meta/`, `.python-version`
 - Entry point files: `main.*`, `index.*`, `app.*`, `server.*`
 - Test directory names and test file patterns
 - CI/CD config files: `.github/workflows/`, `Makefile`, `Dockerfile`
@@ -66,6 +67,14 @@ From the scan output, determine with confidence:
 - **Test framework**: Vitest | Jest | pytest | cargo test | go test | none
 - **Build tool**: tsc | vite | webpack | esbuild | cargo | none
 - **Linter/formatter**: ESLint | Biome | Ruff | Black | Clippy | none
+- **Python environment** (if Python project): detect from project markers:
+  - `.venv/` or `venv/` directory → venv
+  - `poetry.lock` → poetry
+  - `uv.lock` → uv
+  - `.python-version` → pyenv
+  - `conda-meta/` or `environment.yml` → conda
+  - `Pipfile.lock` → pipenv
+  - None found → none (note: recommend setting up a virtual environment)
 
 If a field cannot be determined with confidence, write "unknown" — do not guess.
 
@@ -109,10 +118,15 @@ Use `Write` to create `.rune/DEVELOPER-GUIDE.md` with this template:
 ## Quick Setup
 [Copy-paste commands to get from zero to running locally]
 ```bash
+# [Python projects] Activate virtual environment
+[detected activation command — e.g., source .venv/bin/activate | poetry shell | uv venv && source .venv/bin/activate]
+
 # Install dependencies
-[detected command]
+[detected command — e.g., pip install -e ".[dev]" | poetry install | npm install]
+
 # Run development server
 [detected command]
+
 # Run tests
 [detected command]
 ```
@@ -128,6 +142,11 @@ Use `Write` to create `.rune/DEVELOPER-GUIDE.md` with this template:
 
 ## Common Issues
 [Top 3 "it doesn't work" situations with fixes. Only include issues you can infer from the codebase — e.g., missing .env, wrong Node version, database not running]
+
+[Python projects — always include these if applicable:]
+- **ModuleNotFoundError** → Virtual environment not activated. Run: `[activation command]`
+- **ImportError: cannot import name X** → Dependencies outdated. Run: `[install command]`
+- **PYTHONPATH issues** → If using src layout, install in editable mode: `pip install -e .`
 
 ## Who to Ask
 [If git log reveals consistent contributors, list them. Otherwise omit this section.]
@@ -193,6 +212,7 @@ If any of the `.rune/` files already exist, do not overwrite them (they may cont
 - Test Framework: [detected]
 - Build Tool: [detected]
 - Linter: [detected]
+- Python Environment: [detected — venv/poetry/uv/conda/pyenv/pipenv/none] (only if Python project)
 
 ## Directory Structure
 [Generated tree with one-line annotations per directory]

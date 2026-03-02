@@ -54,6 +54,10 @@ Use `Glob` to find config files and identify the framework:
 - `jest.config.*` or `"jest"` key in `package.json` → Jest
 - `vitest.config.*` or `"vitest"` key in `package.json` → Vitest
 - `pytest.ini`, `[tool.pytest.ini_options]` in `pyproject.toml` → pytest
+  - **Async check**: If pytest detected AND source files contain `async def`:
+    - Check if `pytest-asyncio` is in dependencies (`pyproject.toml [project.dependencies]` or `[project.optional-dependencies]`)
+    - Check if `asyncio_mode` is set in `[tool.pytest.ini_options]` (values: `auto`, `strict`, or absent)
+    - If async code exists but no `asyncio_mode` configured → **WARN**: "pytest-asyncio not configured. Async tests may silently pass without executing async code. Recommend adding `asyncio_mode = \"auto\"` to `[tool.pytest.ini_options]` in pyproject.toml."
 - `Cargo.toml` with `#[cfg(test)]` pattern → built-in `cargo test`
 - `*_test.go` files present → built-in `go test`
 - `cypress.config.*` → Cypress (E2E)
@@ -82,13 +86,36 @@ Use `Write` to create test files following the detected conventions:
 
 5. For async code: use `async/await` or pytest `@pytest.mark.asyncio`
 
+#### Python Async Tests (pytest-asyncio)
+
+When writing tests for async Python code:
+
+1. **Verify setup before writing tests**:
+   - Confirm `pytest-asyncio` is in project dependencies
+   - Confirm `asyncio_mode` is set in `pyproject.toml` `[tool.pytest.ini_options]` (recommend `"auto"`)
+   - If neither is configured, warn the caller and suggest setup before proceeding
+
+2. **Writing async test functions**:
+   - With `asyncio_mode = "auto"`: just write `async def test_something():` — no decorator needed
+   - With `asyncio_mode = "strict"`: every async test needs `@pytest.mark.asyncio`
+   - Without asyncio_mode set: always use `@pytest.mark.asyncio` decorator explicitly
+
+3. **Async fixtures**:
+   - Use `@pytest_asyncio.fixture` (NOT `@pytest.fixture`) for async setup/teardown
+   - Scope rules: async fixtures default to `function` scope — use `scope="session"` carefully with async
+
+4. **Common pitfalls**:
+   - Tests that `pass` without `await` — they run but don't execute the async path
+   - Missing `pytest-asyncio` makes `async def test_*` silently pass as empty coroutines
+   - Mixing sync and async fixtures can cause event loop errors
+
 ### Phase 4: Run Tests — Verify They FAIL (RED)
 
 Use `Bash` to run ONLY the newly created test files (not full suite):
 
 - **Jest**: `npx jest path/to/test.ts --no-coverage`
 - **Vitest**: `npx vitest run path/to/test.ts`
-- **pytest**: `pytest path/to/test_file.py -v`
+- **pytest**: `pytest path/to/test_file.py -v` (if async tests and no `asyncio_mode` in config: add `--asyncio-mode=auto`)
 - **Rust**: `cargo test test_module_name`
 - **Go**: `go test ./path/to/package/... -run TestFunctionName`
 

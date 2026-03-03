@@ -36,6 +36,7 @@ TodoWrite: [
   { content: "Run targeted file search", status: "pending" },
   { content: "Map dependencies", status: "pending" },
   { content: "Detect conventions", status: "pending" },
+  { content: "Generate codebase map (if full scan)", status: "pending" },
   { content: "Generate scout report", status: "pending" }
 ]
 ```
@@ -73,13 +74,52 @@ Based on the scan request, run focused searches:
 3. Find existing tests with `Glob`: `**/*.test.*`, `**/*.spec.*`, `**/test_*`
 4. Determine test framework: `jest.config.*`, `vitest.config.*`, `pytest.ini`
 
-### Phase 5: Generate Report
+### Phase 5: Codebase Map (Optional)
+
+When called by `cook`, `team`, `onboard`, or `autopsy` (skills that need full project understanding), generate a structured codebase map:
+
+1. Create `.rune/codebase-map.md` with:
+
+```markdown
+## Codebase Map
+Generated: [timestamp]
+
+### Module Boundaries
+| Module | Directory | Public API | Dependencies | Domain |
+|--------|-----------|-----------|--------------|--------|
+| auth | src/auth/ | login(), logout(), verify() | database, config | Authentication |
+| api | src/api/ | routes, middleware | auth, database | HTTP Layer |
+
+### Dependency Graph (Mermaid)
+​```mermaid
+graph LR
+  api --> auth
+  api --> database
+  auth --> database
+  auth --> config
+​```
+
+### Domain Ownership
+| Domain | Modules | Key Files |
+|--------|---------|-----------|
+| Authentication | auth, session | src/auth/login.ts, src/auth/verify.ts |
+| Data Layer | database, models | src/db/schema.ts, src/models/ |
+```
+
+2. Derive modules from directory structure (top-level `src/` subdirectories, or detected framework conventions)
+3. Public API = exported functions/classes from each module's index/entry file
+4. Dependencies = import statements between modules (from Phase 3)
+5. Domain = inferred from module name + file contents (auth, payments, frontend, infra, data, config, etc.)
+
+**Skip this phase** when called by skills that only need targeted search (debug, fix, review, sentinel).
+
+### Phase 6: Generate Report
 
 Produce structured output for the calling skill. Update TodoWrite to completed.
 
 ## Constraints
 
-- **Read-only**: NEVER use Edit, Write, or Bash with destructive commands
+- **Read-only**: NEVER use Edit, Write, or Bash with destructive commands. Exception: Phase 5 may write `.rune/codebase-map.md` when called by cook, team, onboard, or autopsy
 - **Fast**: Max 10 file reads per scan. Prioritize by relevance score
 - **Focused**: Only scan what is relevant to the request, not the entire codebase
 - **No side effects**: Do not cache, store, or modify anything
@@ -158,6 +198,7 @@ Known failure modes for this skill. Check these before declaring done.
 - Targeted file search completed for the caller's domain
 - Dependency blast radius identified for target files
 - Conventions detected (naming, test framework, linting config)
+- Codebase map written to `.rune/codebase-map.md` (when called by cook, team, onboard, autopsy)
 - Scout Report emitted in structured format with Relevant Files table
 
 ## Cost Profile

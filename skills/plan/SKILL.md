@@ -116,6 +116,54 @@ Present the full plan to the user. Do NOT begin execution. Wait for explicit app
 
 If the user requests changes, revise the plan and re-present. Do not skip re-presentation after revisions.
 
+## Re-Planning (Dynamic Adaptation)
+
+Plans are not static. When cook encounters unexpected conditions during implementation, it can request a plan revision.
+
+### Trigger Conditions
+- Phase 4 (IMPLEMENT) hits max debug-fix loops (3) on a specific area
+- New files discovered outside the original plan scope
+- Dependency added that changes the implementation approach
+- User requests scope change mid-implementation
+
+### Re-Plan Protocol
+
+When cook calls back with delta context:
+
+1. **Read the original plan** (from Phase 2 output or `.rune/features/<name>/plan.md`)
+2. **Read the delta context**: what changed, what failed, what was discovered
+3. **Assess impact**: which remaining phases are affected?
+4. **Revise plan**:
+   - Mark completed phases as `[DONE]`
+   - Modify affected future phases with updated file paths, logic, dependencies
+   - Add new phases if scope expanded
+   - **Do NOT rewrite completed phases** — only append/modify pending work
+5. **Present revised plan** to user with diff summary:
+   - "Original: N phases. Revised: M phases. Changes: [list of what changed and why]"
+6. **Get approval** before cook resumes
+
+### Output Format (Re-Plan)
+
+```
+## Revised Plan: [Task Name]
+
+### What Changed
+- [trigger]: [description of what was discovered]
+- [impact]: [which phases affected]
+
+### Revised Phases
+1. **Phase 1: [name]** — [DONE]
+2. **Phase 2: [name]** — [DONE]
+3. **Phase 3: [name]** — [MODIFIED: reason]
+   - Files: [updated paths]
+   - Changes: [updated implementation]
+4. **Phase 4: [name]** — [NEW: reason]
+   ...
+
+### Awaiting Approval
+Reply "go" to resume with revised plan.
+```
+
 ## Constraints
 
 1. MUST include exact file paths for every phase — no vague "set up the database"

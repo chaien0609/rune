@@ -66,19 +66,26 @@ THEN: Fast Mode activated
 
 1. Create TodoWrite with all applicable phases for this task
 2. Mark Phase 1 as `in_progress`
-3. Invoke scout to scan the codebase:
+3. **Decision enforcement** — load prior decisions:
+   - Use `Glob` to check for `.rune/decisions.md`
+   - If exists, use `Read` to load it
+   - Extract decisions relevant to the current task domain (match by keywords: module names, tech choices, patterns)
+   - These become **constraints for Phase 2 (PLAN)** — the plan MUST NOT contradict active decisions without explicit user override
+   - If no `.rune/decisions.md` exists, skip silently
+4. Invoke scout to scan the codebase:
    - Use `Glob` to find files matching the feature domain (e.g., `**/*auth*`, `**/*user*`)
    - Use `Grep` to search for related patterns, imports, existing implementations
    - Use `Read` to examine key files identified
-4. Summarize findings:
+5. Summarize findings:
    - What exists already
    - What patterns/conventions the project uses
    - What files will likely need to change
-5. **Python async detection**: If Python project detected (`pyproject.toml` or `setup.py`), use `Grep` for async indicators:
+   - **Active decisions that constrain this task** (from step 3)
+6. **Python async detection**: If Python project detected (`pyproject.toml` or `setup.py`), use `Grep` for async indicators:
    - Search for: `async def`, `await`, `aiosqlite`, `aiohttp`, `httpx.AsyncClient`, `asyncio.run`, `trio`
    - If ≥3 matches across source files → flag project as **"async-first Python"**
    - Note for later phases: new code should default to `async def`, avoid blocking calls (`requests.get`, `time.sleep`, `open()`)
-6. Mark Phase 1 as `completed`
+7. Mark Phase 1 as `completed`
 
 **Gate**: If scout finds the feature already exists → STOP and inform user.
 
@@ -122,13 +129,27 @@ This phase is lightweight — a Read + pattern match, not a full scan. It does N
 **REQUIRED SUB-SKILL**: Use `rune:plan`
 
 1. Mark Phase 2 as `in_progress`
-2. Based on scout findings, create an implementation plan:
+2. **Feature workspace** (opt-in) — for non-trivial features (3+ phases), suggest creating a feature workspace:
+   ```
+   .rune/features/<feature-name>/
+   ├── spec.md       — what we're building and why (user's original request + context)
+   ├── plan.md       — implementation plan (output of plan skill)
+   ├── decisions.md  — feature-specific decisions (subset of .rune/decisions.md)
+   └── status.md     — progress tracking (completed/pending phases)
+   ```
+   - Ask user: "Create feature workspace for `<feature-name>`?" — if yes, create the directory + spec.md with the user's request
+   - plan.md is written after Step 4 (plan approval)
+   - Skip for simple bug fixes, small refactors, or fast mode
+   - Session-bridge (Phase 8) auto-updates status.md if workspace exists
+3. Based on scout findings, create an implementation plan:
    - List exact files to create/modify
    - Define the order of changes
    - Identify dependencies between steps
-3. If multiple valid approaches exist → invoke `rune:brainstorm` for trade-off analysis
-4. Present plan to user for approval
-5. Mark Phase 2 as `completed`
+   - **Include active decisions from Phase 1 step 3 as constraints** — plan must respect prior decisions or explicitly flag overrides
+4. If multiple valid approaches exist → invoke `rune:brainstorm` for trade-off analysis
+5. Present plan to user for approval
+6. If feature workspace was created (step 2), write approved plan to `.rune/features/<name>/plan.md`
+7. Mark Phase 2 as `completed`
 
 **Gate**: User MUST approve the plan before proceeding. Do NOT skip this.
 
@@ -175,8 +196,21 @@ This phase is lightweight — a Read + pattern match, not a full scan. It does N
      - Prefer `asyncio.gather()` for parallel I/O operations
      - Use `asyncio.TaskGroup` (Python 3.11+) for structured concurrency
 4. If stuck on unexpected errors → invoke `rune:debug` (max 3 debug↔fix loops)
-5. All tests MUST pass before proceeding
-6. Mark Phase 4 as `completed`
+5. **Re-plan check** — before proceeding to Phase 5, evaluate:
+   - Did debug-fix loops hit max (3) for any area? → trigger re-plan
+   - Were files modified outside the approved plan scope? → trigger re-plan
+   - Was a new dependency added that changes the approach? → trigger re-plan
+   - Did the user request a scope change during implementation? → trigger re-plan
+   - If any trigger fires: invoke `rune:plan` with delta context:
+     ```
+     Delta: { original_plan: "Phase 2 plan or .rune/features/<name>/plan.md",
+              trigger: "max_debug | scope_expansion | new_dependency | user_scope_change",
+              failed_area: "description of what went wrong",
+              discovered: "new facts found during implementation" }
+     ```
+     Plan outputs revised phases. Get user approval before resuming.
+6. All tests MUST pass before proceeding
+7. Mark Phase 4 as `completed`
 
 **Gate**: ALL tests from Phase 3 MUST pass. Do NOT proceed with failing tests.
 
@@ -351,6 +385,7 @@ This is OPT-IN — only activate if:
 5. MUST NOT modify files outside the approved plan scope without user confirmation
 6. MUST run verification (lint + type-check + tests + build) before commit — not optional
 7. MUST NOT say "all tests pass" without showing the actual test output
+8. MUST NOT contradict active decisions from `.rune/decisions.md` without explicit user override — if the plan conflicts with a prior decision, flag it and ask user before proceeding
 
 ## Mesh Gates
 

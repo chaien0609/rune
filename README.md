@@ -18,6 +18,35 @@ Mesh:      A ↔ B ↔ C             (B fails = A reaches C via D→E)
            D ↔ E ↔ F
 ```
 
+## What Rune Is (and Isn't)
+
+Rune is a **Claude Code plugin** — it extends Claude Code with structured workflows, not a standalone agent framework.
+
+| | Rune Provides | Claude Code Provides |
+|---|---|---|
+| **Workflows** | 8-phase TDD cycle (cook), parallel DAG execution (team), rescue pipelines | Basic tool calling |
+| **Quality Gates** | preflight + sentinel + review + completion-gate (parallel) | None built-in |
+| **Domain Knowledge** | 12 extension packs (trading, SaaS, mobile, etc.) | General-purpose |
+| **Cross-Session State** | .rune/ directory (decisions, conventions, progress) | Conversation only |
+| **Mesh Resilience** | 160+ skill connections, fail-loud-route-around | Linear execution |
+| **Cost Optimization** | Auto model selection (haiku/sonnet/opus per task) | Single model |
+| | | |
+| **Sandbox & Permissions** | — | Claude Code handles this |
+| **Agent Spawning** | — | Claude Code's Task/Agent system |
+| **MCP Integration** | — | Claude Code's MCP protocol |
+| **File System Access** | — | Claude Code's tool permissions |
+
+### Common Misconceptions
+
+| "Rune doesn't have..." | Reality |
+|---|---|
+| Task graph / DAG | `team` skill: DAG decomposition → parallel worktree agents → merge coordination |
+| CI quality gates | `verification` skill: lint + typecheck + tests + build (actual commands, not LLM review) |
+| Memory / state | `session-bridge` + `journal`: cross-session decisions, conventions, ADRs, module health |
+| Multi-model strategy | Every skill has assigned model: haiku (scan), sonnet (code), opus (architecture) |
+| Agent specialization | 48 specialized skills with dedicated roles (architect, coder, reviewer, scanner, researcher) — each runs as a Task agent via Claude Code |
+| Security scanning | `sentinel`: OWASP patterns, secret scanning, dependency audit. `sast`: static analysis |
+
 ## Install
 
 ```bash

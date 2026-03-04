@@ -41,7 +41,27 @@ TodoWrite: [
 ]
 ```
 
-### Phase 2: Targeted Search
+### Phase 2: Targeted Search (Search-First)
+
+**Search-first principle**: Before building anything new, scout checks if a solution already exists — in the codebase, in package registries, or in available MCP servers.
+
+**Adopt / Extend / Compose / Build decision matrix**:
+
+When scout finds the caller's target domain, classify the situation:
+
+```
+ADOPT     — Exact match exists (in codebase, npm, PyPI, MCP). Use as-is.
+EXTEND    — Partial match exists. Extend/configure existing solution.
+COMPOSE   — Multiple pieces exist. Wire them together.
+BUILD     — Nothing suitable exists. Build from scratch.
+```
+
+Report the classification to the calling skill. This informs Phase 2 (PLAN) in cook — ADOPT and EXTEND are vastly cheaper than BUILD.
+
+**Quick checks before deep search**:
+1. `Grep` the codebase for existing implementations of the target functionality
+2. Check `package.json` / `pyproject.toml` / `Cargo.toml` for relevant installed packages
+3. If the task involves external data/APIs: note available MCP servers that might help
 
 Based on the scan request, run focused searches:
 
@@ -175,6 +195,11 @@ None — pure scanner using Glob, Grep, Read, and Bash tools directly. Does not 
 - Naming: [pattern detected]
 - File structure: [pattern]
 - Test pattern: [pattern]
+
+### Search-First Assessment
+- **Classification**: ADOPT | EXTEND | COMPOSE | BUILD
+- **Existing solution**: [what was found, if any]
+- **Recommendation**: [brief rationale]
 
 ### Observations
 - [pattern or potential issue noticed]

@@ -25,7 +25,8 @@ rune/
 ├── extensions/         # L4 extension packs (one dir per pack)
 ├── commands/           # Slash command definitions
 ├── agents/             # Subagent definitions
-├── hooks/              # Event hooks (session-start, etc.)
+├── contexts/           # Behavioral mode injection (dev, research, review)
+├── hooks/              # Event hooks (session-start, pre-compact, etc.)
 ├── scripts/            # Executable scripts for skills
 └── docs/               # Documentation, templates, and plans
 ```

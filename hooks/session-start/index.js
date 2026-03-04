@@ -34,6 +34,26 @@ if (fs.existsSync(runeDir)) {
     }
   }
 
+  // Inject active behavioral context mode
+  const activeContextFile = path.join(runeDir, 'active-context.md');
+  if (fs.existsSync(activeContextFile)) {
+    try {
+      const mode = fs.readFileSync(activeContextFile, 'utf-8').trim();
+      if (mode) {
+        // Look for the context file in plugin's contexts/ directory
+        const pluginRoot = process.env.CLAUDE_PLUGIN_ROOT || path.join(__dirname, '..', '..');
+        const contextFile = path.join(pluginRoot, 'contexts', `${mode}.md`);
+        if (fs.existsSync(contextFile)) {
+          const contextContent = fs.readFileSync(contextFile, 'utf-8').trim();
+          console.log(`\n=== Active Context: ${mode} mode ===\n${contextContent}`);
+          loaded.push(`active-context(${mode})`);
+        }
+      }
+    } catch {
+      // Non-critical — skip silently
+    }
+  }
+
   if (loaded.length > 0) {
     console.log(`\n[Rune: injected project state from ${loaded.join(', ')}]`);
   } else {

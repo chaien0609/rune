@@ -15,6 +15,20 @@ metadata:
 
 Context window management for long sessions. Detects when context is approaching limits, triggers smart compaction preserving critical decisions and progress, and coordinates with session-bridge to save state before compaction. Prevents the common failure mode of losing important context mid-workflow.
 
+### Behavioral Contexts
+
+Context-engine also manages **behavioral mode injection** via `contexts/` directory. Three modes are available:
+
+| Mode | File | When to Use |
+|------|------|-------------|
+| `dev` | `contexts/dev.md` | Active coding — bias toward action, code-first |
+| `research` | `contexts/research.md` | Investigation — read widely, evidence-based |
+| `review` | `contexts/review.md` | Code review — systematic, severity-labeled |
+
+**Mode activation**: Orchestrators (cook, team, rescue) can set the active mode by writing to `.rune/active-context.md`. The session-start hook injects the active context file into the session. Mode switches mid-session are supported — the orchestrator updates the file and references the new behavioral rules.
+
+**Default**: If no `.rune/active-context.md` exists, no behavioral mode is injected (standard Claude behavior).
+
 ## Triggers
 
 - Called by `cook` and `team` automatically at context boundaries

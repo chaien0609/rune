@@ -178,6 +178,53 @@ Apply only if the framework is detected in changed files:
 - `pickle.loads(user_input)` or `eval(user_expression)` → **BLOCK**
 - `yaml.load()` without `Loader` arg (uses unsafe loader) → **WARN**
 
+### Step 4.6 — Config Protection (3-Layer Defense)
+
+Detect attempts to weaken code quality or security configurations. Agents and developers sometimes disable checks to "fix" build errors — sentinel blocks this.
+
+**Layer 1 — Linter/Formatter Config Drift:**
+Scan diff for changes to these files:
+- `.eslintrc*`, `eslint.config.*`, `biome.json` → rules disabled or removed
+- `tsconfig.json` → `strict` changed to `false`, `any` allowed, `skipLibCheck` added
+- `ruff.toml`, `.ruff.toml`, `pyproject.toml [tool.ruff]` → rules removed from select list
+- `.prettierrc*` → significant format changes without team discussion
+
+Detection patterns:
+```
+# ESLint rule disable
+"off" or 0 in rule config (compare with previous)
+// eslint-disable added to >3 lines in same file
+
+# TypeScript strictness weakening
+"strict": false
+"noImplicitAny": false
+"skipLibCheck": true (added, not already present)
+
+# Ruff rule removal
+select = [...] with fewer rules than before
+```
+
+Match = **WARN** with message: "Config change weakens code quality — verify this is intentional."
+
+**Layer 2 — Security Middleware Removal:**
+Scan for removal of security-critical middleware/imports:
+- `helmet` removed from Express/Fastify middleware chain
+- `csrf` middleware removed or commented out
+- `cors` configuration changed to `origin: '*'`
+- `SecurityMiddleware` removed from Django `MIDDLEWARE`
+- `@csrf_protect` decorator removed from Django views
+
+Match = **BLOCK** with message: "Security middleware removed — this must be explicitly justified."
+
+**Layer 3 — CI/CD Safety Bypass:**
+Scan for weakening of CI/CD safety checks:
+- `--no-verify` added to git commands in scripts
+- `--force` added to deployment scripts
+- Test steps removed or marked `continue-on-error: true`
+- Coverage thresholds lowered
+
+Match = **WARN** with message: "CI safety check weakened — verify this is intentional."
+
 ### Step 4.7 — Agentic Security Scan
 
 If `.rune/` directory exists in the project, invoke `integrity-check` (L3) to scan for adversarial content:

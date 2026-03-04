@@ -21,6 +21,25 @@ Before starting ANY implementation:
 This applies to EVERY feature regardless of perceived simplicity.
 </HARD-GATE>
 
+## Workflow Chains (Predefined)
+
+Cook supports predefined workflow chains for common task types. Use these as shortcuts instead of manually determining phases:
+
+```
+/rune cook feature    → Full TDD pipeline (all phases)
+/rune cook bugfix     → Diagnose → fix → verify (Phase 1 → 4 → 6 → 7)
+/rune cook refactor   → Understand → plan → implement → quality (Phase 1 → 2 → 4 → 5 → 6 → 7)
+/rune cook security   → Full pipeline + sentinel@opus + sast (all phases, security-escalated)
+/rune cook hotfix     → Minimal: fix → verify → commit (Phase 4 → 6 → 7, skip scout if user provides context)
+```
+
+**Chain selection**: If user invokes `/rune cook` without a chain type, auto-detect from the task description:
+- Contains "bug", "fix", "broken", "error" → `bugfix`
+- Contains "refactor", "clean", "restructure" → `refactor`
+- Contains "security", "auth", "vulnerability", "CVE" → `security`
+- Contains "urgent", "hotfix", "production" → `hotfix`
+- Default → `feature`
+
 ## Phase Skip Rules
 
 Not every task needs every phase:
@@ -329,6 +348,41 @@ This is OPT-IN — only activate if:
      - Format: `{ "id": "r-<timestamp>", "condition": "<error pattern>", "action": "route to problem-solver before debug", "source": "auto", "active": true }`
    - Max 10 active rules — if exceeded, remove oldest inactive rule
 7. Mark Phase 8 as `completed`
+
+## Autonomous Loop Patterns
+
+When cook runs inside `team` (L1) or autonomous workflows, these patterns apply:
+
+### De-Sloppify Pass
+
+After Phase 4 (IMPLEMENT), if the implementation touched 5+ files, run a focused cleanup pass:
+1. Re-read all modified files
+2. Check for: leftover debug statements, inconsistent naming, duplicated logic, missing error handling
+3. Fix issues found (this is still Phase 4 — not a new phase)
+4. This pass catches "almost right" code that slips through when focused on making tests pass
+
+### Continuous PR Loop (team orchestration only)
+
+When `team` runs multiple cook instances in parallel:
+```
+cook instance → commit → push → create PR → wait CI
+  IF CI passes → mark workstream complete
+  IF CI fails → read CI output → fix → push → wait CI (max 3 retries)
+  IF 3 retries fail → escalate to user with CI logs
+```
+
+### Exit Conditions (Mandatory for Autonomous Runs)
+
+Every cook invocation inside `team` or autonomous workflows MUST have exit conditions:
+
+```
+MAX_DEBUG_LOOPS:   3 per error area (already enforced)
+MAX_QUALITY_LOOPS: 2 re-runs of Phase 5 (fix→recheck cycle)
+MAX_REPLAN:        1 re-plan per cook session (Phase 4 re-plan check)
+TIMEOUT_SIGNAL:    If context-watch reports ORANGE, wrap up current phase and checkpoint
+```
+
+If any exit condition triggers without resolution → cook emits `BLOCKED` status with details and stops. Never spin indefinitely.
 
 ## Error Recovery
 

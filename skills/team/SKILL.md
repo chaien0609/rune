@@ -1,9 +1,11 @@
 ---
 name: team
-description: Multi-agent meta-orchestrator. Decomposes large tasks into parallel workstreams, assigns to isolated cook instances, coordinates merging. Uses opus for strategic coordination.
+description: "Multi-agent meta-orchestrator. Use when task spans 5+ files or 3+ modules, or when user says 'parallel', 'split this up', 'do all of these'. Decomposes large tasks into parallel workstreams, assigns to isolated cook instances, coordinates merging."
+context: fork
+agent: general-purpose
 metadata:
   author: runedev
-  version: "0.2.0"
+  version: "0.3.0"
   layer: L1
   model: opus
   group: orchestrator

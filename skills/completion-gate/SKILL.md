@@ -1,9 +1,10 @@
 ---
 name: completion-gate
-description: "Validates agent claims against evidence trail. Catches 'done' without proof, 'tests pass' without output, 'fixed' without verification."
+description: "Validates agent claims against evidence trail. Catches 'done' without proof, 'tests pass' without output, 'fixed' without verification. Called by cook and team at workflow end."
+user-invocable: false
 metadata:
   author: runedev
-  version: "1.0.0"
+  version: "1.1.0"
   layer: L3
   model: haiku
   group: validation

@@ -1,9 +1,12 @@
 ---
 name: launch
-description: Deploy + marketing orchestrator. Runs the full launch pipeline — pre-flight tests, deployment, live verification, marketing asset creation, and announcement.
+description: "Deploy + marketing orchestrator. Use when user says 'launch', 'ship to production', 'deploy and announce', or 'go live'. Runs the full pipeline — pre-flight tests, deployment, live verification, marketing asset creation, and announcement."
+context: fork
+agent: general-purpose
+disable-model-invocation: true
 metadata:
   author: runedev
-  version: "0.2.0"
+  version: "0.3.0"
   layer: L1
   model: sonnet
   group: orchestrator

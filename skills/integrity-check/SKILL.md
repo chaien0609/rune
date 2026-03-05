@@ -1,9 +1,10 @@
 ---
 name: integrity-check
-description: Verify integrity of persisted state, skill outputs, and context bus data. Detects prompt injection, memory poisoning, identity spoofing, and adversarial payloads in .rune/ files and agent outputs.
+description: "Verify integrity of persisted state, skill outputs, and context bus data. Detects prompt injection, memory poisoning, identity spoofing, and adversarial payloads in .rune/ files and agent outputs. Called by sentinel, team, and session-bridge."
+user-invocable: false
 metadata:
   author: runedev
-  version: "0.1.0"
+  version: "0.2.0"
   layer: L3
   model: haiku
   group: validation

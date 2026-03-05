@@ -1,9 +1,10 @@
 ---
 name: worktree
-description: "Git worktree lifecycle management. Creates isolated workspaces for parallel development, manages branches, handles cleanup. Extracted from team for reuse."
+description: "Git worktree lifecycle management. Creates isolated workspaces for parallel development, manages branches, handles cleanup. Called by team and cook for parallel isolation."
+user-invocable: false
 metadata:
   author: runedev
-  version: "1.0.0"
+  version: "1.1.0"
   layer: L3
   model: haiku
   group: utility

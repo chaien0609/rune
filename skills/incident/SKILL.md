@@ -1,9 +1,10 @@
 ---
 name: incident
-description: Structured incident response. Triage severity, contain blast radius, root-cause after containment, document timeline, generate postmortem with prevention actions.
+description: "Structured incident response. Use when user reports an outage, production error, or says 'incident', 'something is down', 'users are affected'. Triage severity, contain blast radius, root-cause, document timeline, generate postmortem."
+disable-model-invocation: true
 metadata:
   author: runedev
-  version: "0.1.0"
+  version: "0.2.0"
   layer: L2
   model: sonnet
   group: delivery

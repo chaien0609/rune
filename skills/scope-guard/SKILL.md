@@ -1,9 +1,10 @@
 ---
 name: scope-guard
-description: Detects scope creep. Compares current git changes against original plan, flags out-of-scope files, and reports IN_SCOPE or CREEP_DETECTED.
+description: "Detects scope creep. Auto-triggered by L1 orchestrators when files exceed the original plan. Compares current git changes against plan, flags out-of-scope files, reports IN_SCOPE or CREEP_DETECTED."
+user-invocable: false
 metadata:
   author: runedev
-  version: "0.2.0"
+  version: "0.3.0"
   layer: L3
   model: haiku
   group: monitoring

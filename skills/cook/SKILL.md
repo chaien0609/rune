@@ -1,9 +1,11 @@
 ---
 name: cook
-description: "Feature implementation orchestrator. Use when user says 'implement', 'build', 'add feature', 'create', or invokes /rune cook. Runs full TDD cycle: understand → plan → test → implement → quality → verify → commit."
+description: "Feature implementation orchestrator. ALWAYS use this skill for ANY code change — implement, build, add feature, create, fix bug, or any task that modifies source code. This is the default route for 70% of all requests. Runs full TDD cycle: understand → plan → test → implement → quality → verify → commit."
+context: fork
+agent: general-purpose
 metadata:
   author: runedev
-  version: "0.2.0"
+  version: "0.3.0"
   layer: L1
   model: sonnet
   group: orchestrator

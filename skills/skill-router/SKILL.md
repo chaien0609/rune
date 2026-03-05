@@ -1,13 +1,20 @@
 ---
 name: skill-router
-description: Meta-enforcement layer that routes every agent action through the correct skill. Prevents rationalization, enforces check-before-act discipline.
+description: "Meta-enforcement layer that routes EVERY agent action through the correct skill. MUST check this routing table before ANY response involving code, files, or technical decisions. Default: route to rune:cook for code tasks. Prevents rationalization, enforces check-before-act discipline."
+user-invocable: false
 metadata:
   author: runedev
-  version: "1.0.0"
+  version: "1.1.0"
   layer: L0
   model: haiku
   group: orchestrator
 ---
+
+## Live Routing Context
+
+Routing overrides (if available): !`cat .rune/metrics/routing-overrides.json 2>/dev/null || echo "No adaptive routing rules active."`
+
+Recent skill usage: !`cat .rune/metrics/skills.json 2>/dev/null | head -20 || echo "No metrics collected yet."`
 
 # skill-router
 

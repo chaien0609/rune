@@ -1,9 +1,10 @@
 ---
 name: constraint-check
-description: "Meta-validator for HARD-GATEs. Verifies that skills' mandatory constraints were followed during a workflow. Use when completing a cook/team session to audit discipline compliance."
+description: "Meta-validator for HARD-GATEs. Verifies that skills' mandatory constraints were followed during a workflow. Called by cook, team, and audit to audit discipline compliance."
+user-invocable: false
 metadata:
   author: runedev
-  version: "1.0.0"
+  version: "1.1.0"
   layer: L3
   model: haiku
   group: validation

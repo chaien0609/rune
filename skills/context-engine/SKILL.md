@@ -1,9 +1,10 @@
 ---
 name: context-engine
-description: Context window management. Detects when context is filling up, triggers smart compaction, and preserves critical information across compaction boundaries.
+description: "Context window management. Auto-triggered when context is filling up. Triggers smart compaction and preserves critical information across compaction boundaries. Called by L1 orchestrators at context thresholds."
+user-invocable: false
 metadata:
   author: runedev
-  version: "0.3.0"
+  version: "0.4.0"
   layer: L3
   model: haiku
   group: state

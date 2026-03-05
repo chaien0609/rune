@@ -1,9 +1,10 @@
 ---
 name: deploy
-description: Deploy application to target platform. Handles Vercel, Netlify, AWS, GCP, DigitalOcean, and VPS deployments with pre-deploy verification and health checks.
+description: "Deploy application to target platform. Use when user explicitly says 'deploy', 'push to production', 'ship it'. Handles Vercel, Netlify, AWS, GCP, DigitalOcean, and VPS with pre-deploy verification and health checks."
+disable-model-invocation: true
 metadata:
   author: runedev
-  version: "0.2.0"
+  version: "0.3.0"
   layer: L2
   model: sonnet
   group: delivery

@@ -3,6 +3,17 @@
 All notable changes to Rune are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.1] - 2025-03-05
+
+### Added
+- **Agent Skills standard compliance** — adopted frontmatter fields from Anthropic's official skills spec.
+- `context: fork` on all L1 orchestrators (cook, team, launch, rescue) — run in isolated subagent context.
+- `disable-model-invocation: true` on side-effect skills (launch, deploy, incident) — prevents Claude from auto-triggering deployments or incident responses.
+- `user-invocable: false` on internal L3 utilities (completion-gate, constraint-check, integrity-check, context-engine, scope-guard, worktree, skill-router) — Claude-only background skills.
+- Dynamic context injection (`!`command``) on skill-router — injects live routing overrides and skill metrics before Claude reads the routing table.
+- Pushy descriptions on all L1 orchestrators — prevents undertriggering per Anthropic's best practice.
+- Explicit `skills[]` array in marketplace.json listing all 49 skill paths.
+
 ## [1.5.0] - 2025-03-05
 
 ### Added

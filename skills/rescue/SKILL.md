@@ -1,9 +1,11 @@
 ---
 name: rescue
-description: Legacy refactoring orchestrator. Multi-session workflow to safely modernize messy codebases — autopsy, safety net, incremental surgery, and progress tracking.
+description: "Legacy refactoring orchestrator. Use when user says 'refactor', 'modernize', 'clean up this mess', 'rescue', or when dealing with old/messy/legacy code. Multi-session workflow — autopsy, safety net, incremental surgery, progress tracking."
+context: fork
+agent: general-purpose
 metadata:
   author: runedev
-  version: "0.2.0"
+  version: "0.3.0"
   layer: L1
   model: sonnet
   group: orchestrator

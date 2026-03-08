@@ -2,13 +2,16 @@
 
 ## Overview
 
-Rune is a Claude Code plugin providing an interconnected skill ecosystem.
-49 core skills | 5-layer mesh architecture (L0 Router → L1 Orchestrators → L2 Hubs → L3 Utilities → L4 Extensions).
+Rune is an interconnected skill ecosystem for AI coding assistants.
+49 core skills | 5-layer mesh architecture | 170+ connections | Multi-platform.
 Philosophy: "Less skills. Deeper connections."
+
+Works on: Claude Code (native plugin) · Cursor · Windsurf · Google Antigravity · any AI IDE.
 
 ## Tech Stack
 
-- Claude Code Plugin System
+- Claude Code Plugin System (native)
+- Multi-platform compiler (Node.js) — compiles to Cursor, Windsurf, Antigravity, generic
 - Agent Skills SKILL.md format
 - Git for version control
 - Markdown + JSON for configuration
@@ -18,11 +21,18 @@ Philosophy: "Less skills. Deeper connections."
 
 ```
 rune/
-├── .claude-plugin/     # Plugin manifest
+├── .claude-plugin/     # Plugin manifest (Claude Code native)
 │   ├── plugin.json     # Plugin metadata
 │   └── marketplace.json # Marketplace catalog
-├── skills/             # Core skills (L1-L3, one dir per skill)
+├── skills/             # Core skills — SINGLE SOURCE OF TRUTH
 ├── extensions/         # L4 extension packs (one dir per pack)
+├── compiler/           # Multi-platform compiler
+│   ├── bin/rune.js     # CLI (init, build, doctor)
+│   ├── parser.js       # SKILL.md → IR
+│   ├── transformer.js  # Transform pipeline
+│   ├── emitter.js      # IR → platform files
+│   ├── adapters/       # Platform adapters (claude, cursor, windsurf, antigravity, generic)
+│   └── transforms/     # Cross-refs, tool-names, frontmatter, subagents, hooks, branding
 ├── commands/           # Slash command definitions
 ├── agents/             # Subagent definitions
 ├── contexts/           # Behavioral mode injection (dev, research, review)
@@ -45,6 +55,9 @@ rune/
 
 - Validate plugin: `claude plugin validate .`
 - Test locally: `claude --plugin-dir .`
+- Build for Cursor: `node compiler/bin/rune.js build --platform cursor --output <project-dir>`
+- Build for Windsurf: `node compiler/bin/rune.js build --platform windsurf --output <project-dir>`
+- Validate build: `node compiler/bin/rune.js doctor`
 
 ## Current Wave
 

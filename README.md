@@ -2,7 +2,9 @@
 
 **Less skills. Deeper connections.**
 
-A lean, interconnected skill ecosystem for Claude Code that covers the full project lifecycle — from idea to revenue.
+A lean, interconnected skill ecosystem for AI coding assistants. 49 skills, 170+ mesh connections, full project lifecycle — from idea to production.
+
+Works on **Claude Code** (native plugin) · **Cursor** · **Windsurf** · **Google Antigravity** · any AI IDE
 
 ## Why Rune?
 
@@ -20,7 +22,7 @@ Mesh:      A ↔ B ↔ C             (B fails = A reaches C via D→E)
 
 ## What Rune Is (and Isn't)
 
-Rune is a **Claude Code plugin** — it extends Claude Code with structured workflows, not a standalone agent framework.
+Rune started as a **Claude Code plugin** and now compiles to **every major AI IDE**. Same 49 skills, same mesh connections, same workflows — zero knowledge loss across platforms.
 
 | | Rune Provides | Claude Code Provides |
 |---|---|---|
@@ -49,24 +51,48 @@ Rune is a **Claude Code plugin** — it extends Claude Code with structured work
 
 ## Install
 
+### Claude Code (Native Plugin)
+
 ```bash
 # Via Claude Code plugin marketplace
 /plugin marketplace add rune-kit/rune
 /plugin install rune@rune-kit
 ```
 
-Or clone directly:
+Full mesh: subagents, hooks, adaptive routing, mesh analytics.
+
+### Cursor / Windsurf / Antigravity / Any IDE
 
 ```bash
-git clone https://github.com/rune-kit/rune
+# Compile Rune skills for your platform
+npx @rune-kit/rune init
+
+# Or specify platform explicitly
+npx @rune-kit/rune init --platform cursor
+npx @rune-kit/rune init --platform windsurf
+npx @rune-kit/rune init --platform antigravity
 ```
+
+This compiles all 49 skills into your IDE's rules format. Same knowledge, same workflows.
+
+### Platform Comparison
+
+| Feature | Claude Code | Cursor / Windsurf / Others |
+|---------|-------------|---------------------------|
+| Skills available | 49/49 | 49/49 |
+| Mesh connections | 170+ (programmatic) | 170+ (rule references) |
+| Workflows & HARD-GATEs | Full | Full |
+| Extension packs | 12 | 12 |
+| Subagent parallelism | Native | Sequential fallback |
+| Lifecycle hooks | 8 hooks (JS runtime) | Inline MUST/NEVER constraints |
+| Adaptive model routing | haiku/sonnet/opus | Single model |
+| Mesh analytics | Real-time metrics | Not available |
+
+**Same power, different delivery.** Claude Code gets execution efficiency; other IDEs get the same knowledge and workflows.
 
 ## Quick Start
 
 ```bash
-# Install the plugin
-claude plugin add rune
-
 # Onboard any project (generates CLAUDE.md + .rune/ context)
 /rune onboard
 
@@ -249,6 +275,33 @@ Domain-specific skills that plug into the core mesh:
 | @rune/content | blog, cms, mdx, i18n, seo | Content |
 | @rune/analytics | tracking, a/b testing, funnels, dashboards | Growth |
 
+## Multi-Platform Compiler
+
+Rune includes a 3-stage compiler that transforms SKILL.md files into platform-native rule formats:
+
+```
+skills/*.md → PARSE → TRANSFORM → EMIT → platform rules
+```
+
+**6 transforms applied per platform:**
+1. Cross-references: `rune:cook` → `@rune-cook.mdc` (Cursor) / prose ref (Windsurf)
+2. Tool names: `Read`, `Edit`, `Bash` → generic language
+3. Frontmatter: strip Claude Code-specific directives
+4. Subagents: parallel → sequential workflow
+5. Hooks: runtime hooks → inline MUST/NEVER constraints
+6. Branding: Rune attribution footer
+
+```bash
+# Build for any platform
+npx @rune-kit/rune build --platform cursor
+npx @rune-kit/rune build --platform windsurf
+
+# Validate compiled output
+npx @rune-kit/rune doctor
+```
+
+See [docs/MULTI-PLATFORM.md](docs/MULTI-PLATFORM.md) for the full architecture.
+
 ## Numbers
 
 ```
@@ -256,7 +309,8 @@ Core Skills:       49 (L0: 1 │ L1: 4 │ L2: 23 │ L3: 21)
 Extension Packs:   12
 Mesh Connections:  170+
 Connections/Skill: 3.5 avg
-Pain Points Solved: 92% (18/20 real dev problems)
+Platforms:         5 (Claude Code, Cursor, Windsurf, Antigravity, Generic)
+Compiler:          ~1200 LOC (parser + transforms + adapters + CLI)
 ```
 
 ## License

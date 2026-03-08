@@ -16,6 +16,9 @@ node_modules/
 # Rune local state (per-project, not in plugin)
 .rune/
 
+# Compiler output
+dist/
+
 # Environment
 .env
 .env.local

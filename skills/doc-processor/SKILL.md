@@ -3,7 +3,7 @@ name: doc-processor
 description: Generate and parse office documents — PDF, DOCX, XLSX, PPTX, CSV. Pure format utility for creating reports, exporting data, and processing uploaded documents.
 metadata:
   author: runedev
-  version: "0.1.0"
+  version: "0.2.0"
   layer: L3
   model: sonnet
   group: utility
@@ -178,6 +178,43 @@ Return parsed content as structured data:
   ]
 }
 ```
+
+## Output Format
+
+### Generate Mode Output
+- Generated document file at specified output path
+- Verification report: file exists, non-empty, format valid
+
+```
+Document Generated:
+- Format: [PDF/DOCX/XLSX/PPTX/CSV]
+- Path: [output file path]
+- Size: [file size]
+- Strategy: [e.g., Markdown → HTML → Puppeteer → PDF]
+- Status: verified ✓
+```
+
+### Parse Mode Output
+Structured JSON returned to calling skill:
+
+```json
+{
+  "format": "xlsx",
+  "metadata": { "author": "...", "created": "..." },
+  "content": {
+    "sheets": [
+      {
+        "name": "Sheet1",
+        "headers": ["Col1", "Col2"],
+        "rows": [["val1", "val2"]],
+        "rowCount": 100
+      }
+    ]
+  }
+}
+```
+
+Format-specific fields: `sheets` (XLSX), `pages` (PDF/DOCX), `slides` (PPTX), `rows` (CSV).
 
 ## Constraints
 

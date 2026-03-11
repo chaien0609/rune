@@ -3,7 +3,7 @@ name: ba
 description: Business Analyst agent. Deeply understands user requirements before any planning or coding begins. Asks probing questions, identifies hidden requirements, maps stakeholders, defines scope boundaries, and produces a structured Requirements Document that plan and cook consume.
 metadata:
   author: runedev
-  version: "0.1.0"
+  version: "0.2.0"
   layer: L2
   model: opus
   group: creation
@@ -193,6 +193,50 @@ Created: [date] | BA Session: [summary]
 ```
 
 Save to `.rune/features/<feature-name>/requirements.md`
+
+## Output Format
+
+```
+# Requirements Document: [Feature Name]
+Created: [date] | BA Session: [summary]
+
+## Context
+[Problem statement — 2-3 sentences]
+
+## Stakeholders
+- Primary user: [who, technical level, workflow context]
+- Affected systems: [existing services, databases, APIs]
+
+## User Stories
+US-1: As a [persona], I want to [action] so that [benefit]
+  AC-1.1: GIVEN [context] WHEN [action] THEN [result]
+  AC-1.2: GIVEN [error case] WHEN [action] THEN [error handling]
+
+## Scope
+### In Scope
+- [feature/behavior 1]
+- [feature/behavior 2]
+### Out of Scope
+- [explicitly excluded 1]
+### Assumptions
+- [assumption — risk if wrong]
+
+## Non-Functional Requirements
+| NFR | Requirement | Measurement |
+|-----|-------------|-------------|
+| [Performance/Security/etc.] | [specific target] | [how to verify] |
+
+## Dependencies
+- [API/service/library]: [status — available/needs setup]
+
+## Risks
+- [risk]: [mitigation strategy]
+
+## Next Step
+→ Hand off to rune:plan for implementation planning
+```
+
+Saved to `.rune/features/<feature-name>/requirements.md`
 
 ## Constraints
 

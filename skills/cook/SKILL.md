@@ -13,7 +13,9 @@ metadata:
 
 # cook
 
-The primary orchestrator for feature implementation. Coordinates the entire L2 mesh in a phased TDD workflow.
+## Purpose
+
+The primary orchestrator for feature implementation. Coordinates the entire L2 mesh in a phased TDD workflow. Handles 70% of all user requests — any task that modifies source code routes through cook.
 
 <HARD-GATE>
 Before starting ANY implementation:

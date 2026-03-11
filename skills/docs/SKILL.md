@@ -3,7 +3,7 @@ name: docs
 description: Auto-generate and maintain project documentation. Creates README, API docs, architecture docs, changelogs, and keeps them in sync with code changes. The "docs are never outdated" skill.
 metadata:
   author: runedev
-  version: "0.1.0"
+  version: "0.2.0"
   layer: L2
   model: sonnet
   group: delivery
@@ -251,6 +251,38 @@ Add context to raw changelog:
 #### Step 3 — Output
 
 Append to or update `CHANGELOG.md`.
+
+## Output Format
+
+### Init Mode Output
+Files generated in project root:
+- `README.md` — Quick Start, Features, Tech Stack, Structure, Config, Dev Commands
+- `ARCHITECTURE.md` — Overview diagram, Key Decisions, Module Map, Data Flow (if 10+ files)
+- `docs/API.md` — Endpoint reference with method, path, params, response, auth (if routes detected)
+
+### Update Mode Output
+Modified doc sections with change summary:
+```
+Docs Update Report:
+- Updated: [list of doc sections modified]
+- Added: [new sections for new code]
+- Flagged: [stale sections referencing deleted code]
+- Changelog: [entry appended to CHANGELOG.md]
+```
+
+### API Mode Output
+`docs/API.md` — markdown reference per endpoint:
+```
+### `METHOD /path/:param`
+**Description**: [from JSDoc/docstring]
+**Auth**: [required/none]
+**Request**: [params, query, body table]
+**Response**: [shape with status codes]
+**Errors**: [error codes and descriptions]
+```
+
+### Changelog Mode Output
+`CHANGELOG.md` — Keep a Changelog format grouped by: Added, Fixed, Changed, Removed.
 
 ## Constraints
 

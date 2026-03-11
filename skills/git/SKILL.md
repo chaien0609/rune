@@ -3,7 +3,7 @@ name: git
 description: Specialized git operations — semantic commits, PR descriptions, branch management, conflict resolution guidance. Replaces ad-hoc git commands with a dedicated, convention-aware utility.
 metadata:
   author: runedev
-  version: "0.1.0"
+  version: "0.2.0"
   layer: L3
   model: haiku
   group: utility
@@ -185,6 +185,54 @@ Group commits by conventional commit type. Format as [Keep a Changelog](https://
 ```
 
 Link to PRs/issues when references found in commit messages.
+
+## Output Format
+
+### Commit Mode
+```
+<type>(<scope>): <description>
+
+[optional body — bullet summary if > 5 files changed]
+
+[BREAKING CHANGE: description — if breaking change detected]
+```
+
+### PR Mode
+```
+Title: <type>: <short description> (< 70 chars)
+
+## Summary
+- [bullet points covering ALL branch changes]
+
+## Changes
+- [grouped by feature/area]
+
+## Test Plan
+- [ ] [specific test scenarios]
+
+## Breaking Changes
+- [if any]
+```
+
+### Branch Mode
+```
+<type>/<short-kebab-description>
+```
+Examples: `feat/jwt-refresh`, `fix/123-login-crash`, `refactor/auth-module`
+
+### Changelog Mode
+```markdown
+## [Unreleased]
+
+### Added
+- Feature description (#PR)
+
+### Fixed
+- Bug fix description (#PR)
+
+### Changed
+- Change description (#PR)
+```
 
 ## Constraints
 

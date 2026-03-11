@@ -419,6 +419,55 @@ Impact × Confidence × Ease (each 1-10). Sort descending.
 **Step 4 — Write Roadmap**
 Save to `.rune/roadmap.md`
 
+## Output Format
+
+### Master Plan (`.rune/plan-<feature>.md`)
+```markdown
+# Feature: <name>
+
+## Overview
+<1-3 sentences: what and why>
+
+## Phases
+| # | Name | Status | Plan File | Summary |
+|---|------|--------|-----------|---------|
+| 1 | [name] | ⬚ Pending | plan-X-phase1.md | [1-line summary] |
+
+## Key Decisions
+- [decision — chosen approach and why]
+
+## Architecture
+<brief system diagram — NOT implementation detail>
+
+## Dependencies / Risks
+- [dep/risk]: [status/mitigation]
+```
+Max 80 lines. No implementation details.
+
+### Phase File (`.rune/plan-<feature>-phase<N>.md`)
+7 mandatory sections (Amateur-Proof Template):
+1. **Goal** — 1-2 sentences
+2. **Data Flow** — 5-line ASCII diagram
+3. **Code Contracts** — function signatures, interfaces
+4. **Tasks** — file paths, logic, edge cases, tests
+5. **Failure Scenarios** — when/then/error table
+6. **Rejection Criteria** — explicit DO NOTs
+7. **Cross-Phase Context** — assumes from prior, exports for future
+8. **Acceptance Criteria** — testable conditions
+
+Max 200 lines. Self-contained — coder needs ONLY this file.
+
+### Inline Plan (trivial tasks)
+```
+## Plan: [Task Name]
+### Changes
+1. [file]: [what] — [signature]
+### Tests
+- [test file]: [cases]
+### Risks
+- [risk]: [mitigation]
+```
+
 ## Constraints
 
 1. MUST produce master plan + phase files for non-trivial tasks (3+ phases OR 5+ files OR 100+ LOC)

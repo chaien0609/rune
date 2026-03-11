@@ -20,6 +20,15 @@ Mesh:      A ↔ B ↔ C             (B fails = A reaches C via D→E)
            D ↔ E ↔ F
 ```
 
+## What's New (v2.1.0)
+
+- **Phase-Aware Execution** — cook v0.5.0 resumes multi-session plans automatically. Master plan + phase files = one phase per session, any model executes accurately
+- **Amateur-Proof Plans** — plan v0.4.0 generates self-contained phase files with data flow diagrams, code contracts, failure scenarios, and rejection criteria. Designed so even the weakest model succeeds
+- **Cognitive Bias Detection** — problem-solver v0.3.0 runs mandatory bias checks (12 biases) before every analysis. Reversibility Filter, Pre-Mortem, Weighted Matrix, MECE decomposition
+- **Second-Order Thinking** — sequential-thinking v0.3.0 classifies decision reversibility, traces cascading effects, and cross-checks for anchoring/status-quo/overconfidence biases
+- **6 New Skills** — ba (business analyst), scaffold (project bootstrap), docs (documentation lifecycle), git (semantic commits), mcp-builder (MCP server generator), doc-processor (PDF/DOCX/XLSX)
+- **Multi-Platform Compiler** — all 55 skills compile to Cursor, Windsurf, Antigravity, and generic formats with zero knowledge loss
+
 ## What Rune Is (and Isn't)
 
 Rune started as a **Claude Code plugin** and now compiles to **every major AI IDE**. Same 55 skills, same mesh connections, same workflows — zero knowledge loss across platforms.
@@ -213,15 +222,18 @@ Typical feature: ~$0.05-0.15 (vs ~$0.60 all-opus).
 ### `/rune cook` — Build a Feature
 
 ```
-Phase 1 UNDERSTAND → scout scans codebase
-Phase 2 PLAN       → plan creates implementation steps
+Phase 0 RESUME     → detect existing .rune/plan-*.md, load active phase
+Phase 1 UNDERSTAND → scout scans codebase, ba elicits requirements
+Phase 2 PLAN       → plan creates master plan + phase files
 Phase 3 TEST       → test writes failing tests (TDD red)
 Phase 4 IMPLEMENT  → fix writes code (TDD green)
-Phase 5 QUALITY    → preflight + sentinel + review
+Phase 5 QUALITY    → preflight + sentinel + review (parallel)
 Phase 6 VERIFY     → verification + hallucination-guard
-Phase 7 COMMIT     → git commit with semantic message
-Phase 8 BRIDGE     → session-bridge saves state
+Phase 7 COMMIT     → git creates semantic commit
+Phase 8 BRIDGE     → session-bridge saves state, announce next phase
 ```
+
+Multi-session: Phase 0 detects existing plans and resumes from the current phase. One phase per session = small context = better code.
 
 ### `/rune rescue` — Refactor Legacy Code
 
@@ -333,10 +345,11 @@ See [docs/MULTI-PLATFORM.md](docs/MULTI-PLATFORM.md) for the full architecture.
 ```
 Core Skills:       55 (L0: 1 │ L1: 5 │ L2: 26 │ L3: 23)
 Extension Packs:   12 free + 3 pro (coming soon)
-Mesh Connections:  200+
-Connections/Skill: 3.6 avg
+Mesh Connections:  206 cross-references + 151 tool references
+Connections/Skill: 3.7 avg
 Platforms:         5 (Claude Code, Cursor, Windsurf, Antigravity, Generic)
 Compiler:          ~1200 LOC (parser + transforms + adapters + CLI)
+Quality:           55/55 skills with Output Format, Sharp Edges, Done When, Cost Profile
 ```
 
 ## License

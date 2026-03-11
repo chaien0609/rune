@@ -3,7 +3,7 @@ name: mcp-builder
 description: Build Model Context Protocol servers from specifications. Generates tool definitions, resource handlers, and test suites for MCP servers in TypeScript or Python (FastMCP).
 metadata:
   author: runedev
-  version: "0.1.0"
+  version: "0.2.0"
   layer: L2
   model: sonnet
   group: creation
@@ -234,6 +234,45 @@ Invoke `rune:verification`:
 - Python: `mypy src/` + `pytest`
 - Ensure all tools respond correctly
 - Ensure configuration validation works
+
+## Output Format
+
+### Generated Project Structure
+
+**TypeScript:**
+```
+mcp-server-<name>/
+├── src/
+│   ├── index.ts          — server entry, tool/resource registration
+│   ├── tools/<name>.ts   — one file per tool (Zod input schema + handler)
+│   ├── resources/<name>.ts — one file per resource (URI template + reader)
+│   ├── lib/client.ts     — external API client
+│   ├── lib/types.ts      — shared TypeScript interfaces
+│   └── config.ts         — env var validation (Zod schema)
+├── tests/tools/<name>.test.ts — per-tool tests (happy, validation, error, edge)
+├── tests/resources/<name>.test.ts
+├── package.json, tsconfig.json, .env.example, README.md
+```
+
+**Python (FastMCP):**
+```
+mcp-server-<name>/
+├── src/
+│   ├── server.py         — FastMCP server with @mcp.tool() decorators
+│   ├── tools/<name>.py   — tool implementations
+│   ├── resources/<name>.py
+│   ├── lib/client.py     — external API client
+│   ├── lib/types.py      — Pydantic models
+│   └── config.py         — pydantic-settings
+├── tests/test_<name>.py
+├── pyproject.toml, .env.example, README.md
+```
+
+### README Structure
+- Server description + tool catalog (name, description, params, example)
+- Resource catalog (URI templates, content types)
+- Installation: Claude Code, Cursor, Windsurf config snippets
+- Configuration reference (env vars with descriptions)
 
 ## Constraints
 

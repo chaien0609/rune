@@ -1,20 +1,33 @@
 # Rune Pro — Premium Extension Packs Plan
 
-Status: IN PROGRESS | Created: 2025-03-10 | Updated: 2025-03-11
+Status: IN PROGRESS | Created: 2025-03-10 | Updated: 2025-03-12
 
 ## Business Model
 
 ```
-rune-kit/rune (FREE, MIT)          rune-kit/rune-pro (PAID, separate repo)
-┌──────────────────────────┐       ┌─────────────────────────────┐
-│ 55 dev skills            │       │ 9 business department packs │
-│ 12 free L4 packs         │       │ ~54 sub-skills              │
-│ Full mesh + compiler     │  ───► │ ~45 workflows               │
-│ Community + MIT license  │  kết  │ Connector templates (MCP)   │
-│                          │  nối  │ Business memory layer       │
-└──────────────────────────┘       └─────────────────────────────┘
-         FREE                        $29-49/month or $199 lifetime
+rune-kit/rune (FREE, MIT)    Rune Pro ($49 lifetime)     Rune Business ($149 lifetime)
+┌──────────────────────┐     ┌──────────────────────┐    ┌──────────────────────┐
+│ 55 dev skills        │     │ Everything Free +    │    │ Everything Pro +     │
+│ 12 free L4 packs     │     │ Product Management   │    │ Finance ops          │
+│ Full mesh + compiler │ ──► │ Sales Enablement     │ ──►│ Legal & Compliance   │
+│ Multi-platform       │     │ Data Science         │    │ HR & Recruiting      │
+│ Community + MIT      │     │ Customer Support     │    │ Enterprise Search    │
+│                      │     │ Business memory      │    │ Custom skill forge   │
+│                      │     │ MCP connectors       │    │ Priority support     │
+│                      │     │ Future updates       │    │ Future updates       │
+└──────────────────────┘     └──────────────────────┘    └──────────────────────┘
+         FREE                      $49 once                    $149 once
 ```
+
+### Why Lifetime (not Subscription)
+
+Skills are static .md files — once user has the source, they can use forever.
+Subscription creates false lock-in that feels unfair. Validated by ClaudeKit ($99 lifetime, 4K+ buyers).
+
+- $49 = impulse buy territory, easy conversion
+- $149 Business = enterprise users wanting full suite
+- Rune gives 55 skills FREE → Pro is add-on, not full product → lower price than ClaudeKit ($99)
+- Future MRR via Rune Cloud (hosted analytics, team metrics) — Phase 3+
 
 ## Brand
 
@@ -69,7 +82,7 @@ Option C: GitHub Marketplace (future)
 - When Claude Code marketplace adds payment → native distribution
 - Currently NOT available (no payment mechanism as of March 2025)
 
-**Recommendation**: Start with Option A (GitHub Sponsors), migrate to B when scale justifies it.
+**Recommendation**: Start with Option A (GitHub Sponsors, $49/$149 one-time tiers), migrate to B when scale justifies it.
 
 ## Priority Packs (Phase 1)
 
@@ -144,7 +157,23 @@ Connections to free Rune:
 - Calls `plan` for dashboard architecture
 - Calls `design` for visualization design tokens
 
-## Phase 2 Packs (after Phase 1 validated)
+## Tier Mapping
+
+| Pack | Pro ($49) | Business ($149) |
+|------|-----------|-----------------|
+| @rune-pro/product | ✅ | ✅ |
+| @rune-pro/sales | ✅ | ✅ |
+| @rune-pro/data-science | ✅ | ✅ |
+| @rune-pro/support | ✅ | ✅ |
+| @rune-pro/finance | - | ✅ |
+| @rune-pro/legal | - | ✅ |
+| @rune-pro/hr | - | ✅ |
+| @rune-pro/operations | - | ✅ |
+| @rune-pro/enterprise-search | - | ✅ |
+| Priority support | - | ✅ |
+| Custom skill forge session | - | ✅ |
+
+## Phase 2 Packs — Business tier (after Phase 1 validated)
 
 ### 4. @rune-pro/support — Customer Support
 - Ticket triage, response drafting, escalation management
@@ -208,7 +237,7 @@ Pro packs that interact with external tools need MCP server connectors:
 |-------|------|------|
 | Phase 0 | Free Rune enhancements (design, marketing, plan, analytics) | Done |
 | Phase 1a | @rune-pro/product pack | ✅ Done (PACK.md created) |
-| Phase 1b | @rune-pro/sales pack | After product validated |
+| Phase 1b | @rune-pro/sales pack | ✅ Done (PACK.md created) |
 | Phase 1c | @rune-pro/data-science pack | After sales validated |
 | Phase 2 | support, finance, legal, hr, operations | After Phase 1 revenue |
 | Phase 3 | enterprise-search + full MCP connector suite | When demand justifies |

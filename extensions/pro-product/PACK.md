@@ -5,7 +5,7 @@ metadata:
   author: runedev
   version: "0.1.0"
   layer: L4
-  price: "$15"
+  price: "included in Pro ($49)"
   target: Product managers, technical founders, dev leads
   pro: true
 ---

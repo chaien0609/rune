@@ -2,7 +2,7 @@
 
 **Less skills. Deeper connections.**
 
-A lean, interconnected skill ecosystem for AI coding assistants. 49 skills, 170+ mesh connections, full project lifecycle — from idea to production.
+A lean, interconnected skill ecosystem for AI coding assistants. 55 skills, 200+ mesh connections, full project lifecycle — from idea to production.
 
 Works on **Claude Code** (native plugin) · **Cursor** · **Windsurf** · **Google Antigravity** · any AI IDE
 
@@ -10,7 +10,7 @@ Works on **Claude Code** (native plugin) · **Cursor** · **Windsurf** · **Goog
 
 Most skill ecosystems are either **too many isolated skills** (540+ that don't talk to each other) or **rigid pipelines** (A → B → C, if B fails everything stops).
 
-Rune is a **mesh** — 49 skills with 170+ connections across a 5-layer architecture. Skills call each other bidirectionally, forming resilient workflows that adapt when things go wrong.
+Rune is a **mesh** — 55 skills with 200+ connections across a 5-layer architecture. Skills call each other bidirectionally, forming resilient workflows that adapt when things go wrong.
 
 ```
 Pipeline:  A → B → C → D         (B fails = stuck)
@@ -22,7 +22,7 @@ Mesh:      A ↔ B ↔ C             (B fails = A reaches C via D→E)
 
 ## What Rune Is (and Isn't)
 
-Rune started as a **Claude Code plugin** and now compiles to **every major AI IDE**. Same 49 skills, same mesh connections, same workflows — zero knowledge loss across platforms.
+Rune started as a **Claude Code plugin** and now compiles to **every major AI IDE**. Same 55 skills, same mesh connections, same workflows — zero knowledge loss across platforms.
 
 | | Rune Provides | Claude Code Provides |
 |---|---|---|
@@ -30,7 +30,7 @@ Rune started as a **Claude Code plugin** and now compiles to **every major AI ID
 | **Quality Gates** | preflight + sentinel + review + completion-gate (parallel) | None built-in |
 | **Domain Knowledge** | 12 extension packs (trading, SaaS, mobile, etc.) | General-purpose |
 | **Cross-Session State** | .rune/ directory (decisions, conventions, progress) | Conversation only |
-| **Mesh Resilience** | 170+ skill connections, fail-loud-route-around | Linear execution |
+| **Mesh Resilience** | 200+ skill connections, fail-loud-route-around | Linear execution |
 | **Cost Optimization** | Auto model selection (haiku/sonnet/opus per task) | Single model |
 | | | |
 | **Sandbox & Permissions** | — | Claude Code handles this |
@@ -46,7 +46,7 @@ Rune started as a **Claude Code plugin** and now compiles to **every major AI ID
 | CI quality gates | `verification` skill: lint + typecheck + tests + build (actual commands, not LLM review) |
 | Memory / state | `session-bridge` + `journal`: cross-session decisions, conventions, ADRs, module health |
 | Multi-model strategy | Every skill has assigned model: haiku (scan), sonnet (code), opus (architecture) |
-| Agent specialization | 49 specialized skills with dedicated roles (architect, coder, reviewer, scanner, researcher) — each runs as a Task agent via Claude Code |
+| Agent specialization | 55 specialized skills with dedicated roles (architect, coder, reviewer, scanner, researcher, BA, scaffolder) — each runs as a Task agent via Claude Code |
 | Security scanning | `sentinel`: OWASP patterns, secret scanning, dependency audit. `sast`: static analysis |
 
 ## Install
@@ -73,14 +73,14 @@ npx @rune-kit/rune init --platform windsurf
 npx @rune-kit/rune init --platform antigravity
 ```
 
-This compiles all 49 skills into your IDE's rules format. Same knowledge, same workflows.
+This compiles all 55 skills into your IDE's rules format. Same knowledge, same workflows.
 
 ### Platform Comparison
 
 | Feature | Claude Code | Cursor / Windsurf / Others |
 |---------|-------------|---------------------------|
-| Skills available | 49/49 | 49/49 |
-| Mesh connections | 170+ (programmatic) | 170+ (rule references) |
+| Skills available | 55/55 | 55/55 |
+| Mesh connections | 200+ (programmatic) | 200+ (rule references) |
 | Workflows & HARD-GATEs | Full | Full |
 | Extension packs | 12 | 12 |
 | Subagent parallelism | Native | Sequential fallback |
@@ -116,6 +116,18 @@ This compiles all 49 skills into your IDE's rules format. Same knowledge, same w
 
 # Generate design system before building UI
 /rune design "trading dashboard with real-time data"
+
+# Bootstrap a new project from scratch (v2.1.0)
+/rune scaffold "REST API with auth, payments, and Docker"
+
+# Deep requirement analysis before building
+/rune ba "integrate Telegram bot with trading signals"
+
+# Auto-generate project documentation
+/rune docs init
+
+# Build an MCP server
+/rune mcp-builder "weather API with forecast tools"
 ```
 
 ## Architecture
@@ -128,23 +140,23 @@ This compiles all 49 skills into your IDE's rules format. Same knowledge, same w
 ║  Meta-enforcement — routes every action               ║
 ║  skill-router                                         ║
 ╠══════════════════════════════════════════════════════╣
-║  L1: ORCHESTRATORS (4)                                ║
+║  L1: ORCHESTRATORS (5)                                ║
 ║  Full lifecycle workflows                             ║
-║  cook │ team │ launch │ rescue                        ║
+║  cook │ team │ launch │ rescue │ scaffold             ║
 ╠══════════════════════════════════════════════════════╣
-║  L2: WORKFLOW HUBS (23)                               ║
+║  L2: WORKFLOW HUBS (26)                               ║
 ║  Cross-hub mesh — the key differentiator              ║
 ║                                                        ║
 ║  Creation:    plan │ scout │ brainstorm │ design │     ║
-║               skill-forge                              ║
+║               skill-forge │ ba │ mcp-builder           ║
 ║  Development: debug │ fix │ test │ review │ db         ║
 ║  Quality:     sentinel │ preflight │ onboard │         ║
 ║               audit │ perf │ review-intake │           ║
 ║               logic-guardian                            ║
-║  Delivery:    deploy │ marketing │ incident            ║
+║  Delivery:    deploy │ marketing │ incident │ docs     ║
 ║  Rescue:      autopsy │ safeguard │ surgeon            ║
 ╠══════════════════════════════════════════════════════╣
-║  L3: UTILITIES (21)                                   ║
+║  L3: UTILITIES (23)                                   ║
 ║  Stateless, pure capabilities                         ║
 ║                                                        ║
 ║  Knowledge:   research │ docs-seeker │ trend-scout     ║
@@ -159,6 +171,8 @@ This compiles all 49 skills into your IDE's rules format. Same knowledge, same w
 ║               video-creator                            ║
 ║  Deps:        dependency-doctor                        ║
 ║  Workspace:   worktree                                 ║
+║  Git:         git                                      ║
+║  Documents:   doc-processor                            ║
 ╠══════════════════════════════════════════════════════╣
 ║  L4: EXTENSION PACKS (12)                             ║
 ║  Domain-specific, install what you need                ║
@@ -305,10 +319,10 @@ See [docs/MULTI-PLATFORM.md](docs/MULTI-PLATFORM.md) for the full architecture.
 ## Numbers
 
 ```
-Core Skills:       49 (L0: 1 │ L1: 4 │ L2: 23 │ L3: 21)
+Core Skills:       55 (L0: 1 │ L1: 5 │ L2: 26 │ L3: 23)
 Extension Packs:   12
-Mesh Connections:  170+
-Connections/Skill: 3.5 avg
+Mesh Connections:  200+
+Connections/Skill: 3.6 avg
 Platforms:         5 (Claude Code, Cursor, Windsurf, Antigravity, Generic)
 Compiler:          ~1200 LOC (parser + transforms + adapters + CLI)
 ```

@@ -1,6 +1,6 @@
 # Rune Skill Expansion Plan — Closing the Gaps
 
-Status: PLANNED | Created: 2025-03-10
+Status: DONE | Created: 2025-03-10 | Completed: 2025-03-11
 Target: v2.1.0 — "The Missing Pieces"
 
 ## Goal

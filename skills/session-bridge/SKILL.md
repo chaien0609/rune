@@ -7,6 +7,7 @@ metadata:
   layer: L3
   model: haiku
   group: state
+  tools: "Read, Write, Edit, Glob, Grep"
 ---
 
 # session-bridge

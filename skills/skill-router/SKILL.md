@@ -8,6 +8,7 @@ metadata:
   layer: L0
   model: haiku
   group: orchestrator
+  tools: "Read, Glob, Grep"
 ---
 
 ## Live Routing Context

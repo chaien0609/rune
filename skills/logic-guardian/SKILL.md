@@ -7,6 +7,7 @@ metadata:
   layer: L2
   model: sonnet
   group: quality
+  tools: "Read, Write, Edit, Glob, Grep"
 ---
 
 # logic-guardian

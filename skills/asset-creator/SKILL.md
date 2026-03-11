@@ -7,6 +7,7 @@ metadata:
   layer: L3
   model: sonnet
   group: media
+  tools: "Read, Write, Edit, Glob, Grep"
 ---
 
 # asset-creator

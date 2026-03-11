@@ -7,6 +7,7 @@ metadata:
   layer: L2
   model: opus
   group: creation
+  tools: "Read, Glob, Grep"
 ---
 
 # brainstorm

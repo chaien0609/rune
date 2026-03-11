@@ -7,6 +7,7 @@ metadata:
   layer: L2
   model: opus
   group: rescue
+  tools: "Read, Bash, Glob, Grep"
 ---
 
 # autopsy

@@ -7,6 +7,7 @@ metadata:
   layer: L3
   model: sonnet
   group: utility
+  tools: "Read, Write, Edit, Bash, Glob, Grep"
 ---
 
 # doc-processor

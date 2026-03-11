@@ -7,6 +7,7 @@ metadata:
   layer: L2
   model: haiku
   group: creation
+  tools: "Read, Glob, Grep"
 ---
 
 # scout

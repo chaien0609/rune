@@ -8,6 +8,7 @@ metadata:
   layer: L3
   model: haiku
   group: validation
+  tools: "Read, Glob, Grep"
 ---
 
 # integrity-check

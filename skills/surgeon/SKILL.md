@@ -7,6 +7,7 @@ metadata:
   layer: L2
   model: sonnet
   group: rescue
+  tools: "Read, Write, Edit, Bash, Glob, Grep"
 ---
 
 # surgeon

@@ -7,6 +7,7 @@ metadata:
   layer: L3
   model: sonnet
   group: monitoring
+  tools: "Read, Bash, Glob, Grep"
 ---
 
 # watchdog

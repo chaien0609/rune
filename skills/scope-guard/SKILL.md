@@ -8,6 +8,7 @@ metadata:
   layer: L3
   model: haiku
   group: monitoring
+  tools: "Read, Glob, Grep"
 ---
 
 # scope-guard

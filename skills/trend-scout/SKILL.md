@@ -7,6 +7,7 @@ metadata:
   layer: L3
   model: haiku
   group: knowledge
+  tools: "Read, Glob, Grep, WebFetch, WebSearch"
 ---
 
 # trend-scout

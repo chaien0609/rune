@@ -7,6 +7,7 @@ metadata:
   layer: L3
   model: sonnet
   group: media
+  tools: "Read, Bash, Glob, Grep"
 ---
 
 # browser-pilot

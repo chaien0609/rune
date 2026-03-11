@@ -7,6 +7,7 @@ metadata:
   layer: L2
   model: sonnet
   group: development
+  tools: "Read, Bash, Glob, Grep"
 ---
 
 # debug

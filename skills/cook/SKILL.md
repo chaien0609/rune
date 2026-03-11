@@ -9,6 +9,7 @@ metadata:
   layer: L1
   model: sonnet
   group: orchestrator
+  tools: "Read, Write, Edit, Bash, Glob, Grep"
 ---
 
 # cook

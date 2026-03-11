@@ -3,7 +3,7 @@ name: "@rune/ai-ml"
 description: AI/ML integration patterns — LLM integration, RAG pipelines, embeddings, and fine-tuning workflows.
 metadata:
   author: runedev
-  version: "0.1.0"
+  version: "0.2.0"
   layer: L4
   price: "$15"
   target: AI engineers
@@ -273,6 +273,193 @@ def evaluate(base_model: str, ft_model: str, eval_set: list[dict]) -> dict:
     for label in results:
         results[label]["accuracy"] = results[label]["correct"] / len(eval_set)
     return results
+```
+
+---
+
+### llm-architect
+
+LLM system architecture — model selection, prompt engineering patterns, evaluation frameworks, cost optimization, multi-model routing, and guardrail design.
+
+#### Workflow
+
+**Step 1 — Assess LLM requirements**
+Understand the use case: what does the LLM need to do? Classify into:
+- **Generation**: open-ended text (blog, email, creative writing)
+- **Extraction**: structured data from unstructured input (JSON from text, entities, classification)
+- **Reasoning**: multi-step logic (math, code generation, planning)
+- **Conversation**: multi-turn dialogue with memory
+- **Agentic**: tool use, function calling, autonomous task execution
+
+For each class, identify: latency requirements (real-time < 2s, async < 30s, batch), accuracy requirements (critical = needs eval suite, casual = spot check), cost sensitivity (per-call budget), and data sensitivity (PII, HIPAA, can data leave the network?).
+
+**Step 2 — Model selection matrix**
+Based on requirements, recommend model tier:
+
+| Requirement | Recommended | Fallback |
+|------------|-------------|----------|
+| Fast + cheap (classification, routing) | Haiku / GPT-4o-mini | Local (Llama 3) |
+| Balanced (code, summaries, RAG) | Sonnet / GPT-4o | Haiku with retry |
+| Deep reasoning (architecture, math) | Opus / o1 | Sonnet with chain-of-thought |
+| On-premise required | Llama 3 / Mistral | Ollama local deployment |
+| Multimodal (vision + text) | Sonnet / GPT-4o | Local LLaVA |
+
+Emit: primary model, fallback model, estimated cost per 1K calls, and latency p50/p99.
+
+**Step 3 — Prompt architecture**
+Design the prompt structure:
+- **System prompt**: Role definition, constraints, output format. Keep under 500 tokens for cost efficiency.
+- **Few-shot examples**: 2-3 examples for extraction/classification tasks. Format matches expected output exactly.
+- **Chain-of-thought**: For reasoning tasks, explicitly request step-by-step thinking before final answer.
+- **Structured output**: JSON mode or tool use for extraction. Define schema with Zod/Pydantic for validation.
+
+**Step 4 — Guardrails and evaluation**
+Design safety and quality layers:
+- **Input guardrails**: PII detection, prompt injection detection, topic filtering
+- **Output guardrails**: Schema validation, hallucination checks, toxicity filtering
+- **Evaluation framework**: Define eval dataset (50+ examples), metrics (accuracy, latency, cost), and regression threshold (new prompt must not drop > 2% on any metric)
+
+Save architecture doc to `.rune/ai/llm-architecture.md`.
+
+#### Example
+
+```typescript
+// Multi-model router with fallback
+interface ModelConfig {
+  id: string;
+  provider: 'anthropic' | 'openai' | 'local';
+  costPer1kTokens: number;
+  maxTokens: number;
+  latencyP50Ms: number;
+}
+
+const MODELS: Record<string, ModelConfig> = {
+  fast: {
+    id: 'claude-haiku-4-5-20251001',
+    provider: 'anthropic',
+    costPer1kTokens: 0.001,
+    maxTokens: 4096,
+    latencyP50Ms: 200,
+  },
+  balanced: {
+    id: 'claude-sonnet-4-6',
+    provider: 'anthropic',
+    costPer1kTokens: 0.01,
+    maxTokens: 8192,
+    latencyP50Ms: 800,
+  },
+  deep: {
+    id: 'claude-opus-4-6',
+    provider: 'anthropic',
+    costPer1kTokens: 0.05,
+    maxTokens: 16384,
+    latencyP50Ms: 2000,
+  },
+};
+
+type TaskComplexity = 'trivial' | 'standard' | 'complex';
+
+function selectModel(complexity: TaskComplexity): ModelConfig {
+  const map: Record<TaskComplexity, string> = {
+    trivial: 'fast',
+    standard: 'balanced',
+    complex: 'deep',
+  };
+  return MODELS[map[complexity]];
+}
+
+// Prompt architecture template
+const systemPrompt = `You are a ${role} assistant.
+
+CONSTRAINTS:
+- ${constraints.join('\n- ')}
+
+OUTPUT FORMAT:
+Return valid JSON matching this schema:
+${JSON.stringify(outputSchema, null, 2)}
+
+Do not include explanations outside the JSON.`;
+
+// Guardrail: validate structured output
+import { z } from 'zod';
+
+const OutputSchema = z.object({
+  classification: z.enum(['positive', 'negative', 'neutral']),
+  confidence: z.number().min(0).max(1),
+  reasoning: z.string().max(200),
+});
+
+function validateOutput(raw: string): z.infer<typeof OutputSchema> {
+  const parsed = JSON.parse(raw);
+  return OutputSchema.parse(parsed); // throws if invalid
+}
+```
+
+---
+
+### prompt-patterns
+
+Reusable prompt engineering patterns — structured output, chain-of-thought, self-critique, tool use orchestration, and multi-turn memory management.
+
+#### Workflow
+
+**Step 1 — Identify the pattern**
+Match the user's task to a proven prompt pattern:
+- **Extraction**: Use JSON mode + schema definition + few-shot examples
+- **Classification**: Use enum output + confidence score + chain-of-thought
+- **Summarization**: Use structured summary template + length constraint + key point extraction
+- **Code generation**: Use system prompt with language constraints + test-driven output format
+- **Agent loop**: Use ReAct pattern (Thought → Action → Observation → repeat)
+- **Self-critique**: Use generate → critique → revise loop for quality-sensitive output
+
+**Step 2 — Apply the pattern**
+Generate the prompt following the selected pattern. Include:
+- System prompt (role + constraints + output format)
+- User message template (input variables marked with `{{variable}}`)
+- Few-shot examples (2-3, matching exact output format)
+- Validation schema (Zod/Pydantic for structured output)
+
+**Step 3 — Test harness**
+Emit a test file with 5+ test cases that validate the prompt produces correct output for known inputs. Include edge cases: empty input, very long input, ambiguous input, adversarial input.
+
+#### Example
+
+```typescript
+// Pattern: ReAct Agent Loop
+const REACT_SYSTEM = `You are an agent that solves tasks using available tools.
+
+For each step, output EXACTLY this JSON format:
+{"thought": "reasoning about what to do next",
+ "action": "tool_name",
+ "action_input": "input for the tool"}
+
+After receiving an observation, continue with the next thought.
+When you have the final answer, output:
+{"thought": "I have the answer", "final_answer": "the answer"}
+
+Available tools:
+{{tools}}`;
+
+// Pattern: Self-Critique Loop
+async function generateWithCritique(prompt: string, maxRounds = 2) {
+  let output = await llm.generate(prompt);
+
+  for (let i = 0; i < maxRounds; i++) {
+    const critique = await llm.generate(
+      `Review this output for errors, omissions, and improvements:\n\n${output}\n\n` +
+      `List specific issues. If no issues, respond with "APPROVED".`
+    );
+
+    if (critique.includes('APPROVED')) break;
+
+    output = await llm.generate(
+      `Original output:\n${output}\n\nCritique:\n${critique}\n\n` +
+      `Revise the output to address all issues in the critique.`
+    );
+  }
+
+  return output;
+}
 ```
 
 ---

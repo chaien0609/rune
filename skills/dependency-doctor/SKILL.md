@@ -7,6 +7,7 @@ metadata:
   layer: L3
   model: haiku
   group: deps
+  tools: "Read, Bash, Glob, Grep"
 ---
 
 # dependency-doctor

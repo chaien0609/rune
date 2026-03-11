@@ -7,6 +7,7 @@ metadata:
   layer: L3
   model: haiku
   group: validation
+  tools: "Read, Bash, Glob, Grep"
 ---
 
 # hallucination-guard

@@ -7,6 +7,7 @@ metadata:
   layer: L3
   model: sonnet
   group: reasoning
+  tools: "Read, Glob, Grep"
 ---
 
 # problem-solver

@@ -7,6 +7,7 @@ metadata:
   layer: L2
   model: opus
   group: creation
+  tools: "Read, Write, Edit, Glob, Grep"
 ---
 
 # plan

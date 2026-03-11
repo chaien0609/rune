@@ -8,6 +8,7 @@ metadata:
   layer: L3
   model: haiku
   group: state
+  tools: "Read, Glob, Grep"
 ---
 
 # context-engine

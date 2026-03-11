@@ -8,6 +8,7 @@ metadata:
   layer: L3
   model: haiku
   group: utility
+  tools: "Read, Bash, Glob, Grep"
 ---
 
 # worktree

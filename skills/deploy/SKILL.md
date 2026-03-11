@@ -8,6 +8,7 @@ metadata:
   layer: L2
   model: sonnet
   group: delivery
+  tools: "Read, Write, Edit, Bash, Glob, Grep"
 ---
 
 # deploy

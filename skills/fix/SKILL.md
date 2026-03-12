@@ -38,6 +38,7 @@ If unsure whether the test is wrong or the implementation is wrong → call `run
 - `docs-seeker` (L3): check correct API usage before applying changes
 - `hallucination-guard` (L3): verify imports after code changes
 - `scout` (L2): find related code before applying changes
+- `neural-memory` (L3): after fix verified — capture fix pattern (cause → solution)
 
 ## Called By (inbound)
 
@@ -118,6 +119,10 @@ Verify correctness of the changes just made.
 - Call `rune:hallucination-guard` to verify all imports introduced or modified are real and correctly named
 - Call `rune:docs-seeker` if any external API, library method, or SDK call was added or changed
 - For complex or risky fixes (auth, data mutation, async logic): call `rune:review` for a full quality check
+
+### Step 6b: Capture Fix Pattern
+
+Call `neural-memory` (Capture Mode) to save the fix pattern: what broke, why, and how it was fixed. Priority 7 for recurring bugs.
 
 ### Step 7: Report
 

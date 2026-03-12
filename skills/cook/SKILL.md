@@ -170,6 +170,8 @@ This phase is lightweight — a Read + pattern match, not a full scan. It does N
 
 **Goal**: Detect if a master plan already exists for this task. If so, skip Phase 1-2 and resume from the current phase.
 
+**Step 0.5 — Cross-Project Recall**: Call `neural-memory` (Recall Mode) with 3-5 topics relevant to the current task. Load applicable patterns, past decisions, and error history from neural memory. Always prefix queries with the project name to avoid cross-project noise (e.g., `"ProjectName auth pattern"` not just `"auth pattern"`). This activates neurons from past sessions and surfaces context that may not be in the local `.rune/` files.
+
 1. Use `Glob` to check for `.rune/plan-*.md` files
 2. If a master plan exists that matches the current task:
    - Read the master plan file
@@ -470,7 +472,8 @@ This is OPT-IN — only activate if:
    - If Phase 4 had 3 debug-fix loops (max) for a specific error pattern, write a routing override to `.rune/metrics/routing-overrides.json`:
      - Format: `{ "id": "r-<timestamp>", "condition": "<error pattern>", "action": "route to problem-solver before debug", "source": "auto", "active": true }`
    - Max 10 active rules — if exceeded, remove oldest inactive rule
-7. Mark Phase 8 as `completed`
+7. **Step 8.5 — Capture Learnings**: Call `neural-memory` (Capture Mode). Save 2-5 memories covering: architecture decisions made this session, patterns introduced or validated, errors encountered and their root-cause fixes, and any trade-offs chosen. Use rich cognitive language (causal, decisional, comparative — not flat facts). Tag each memory with `[project-name, technology, topic]`. Priority: 5 for routine patterns, 7-8 for key decisions, 9-10 for critical errors. Do NOT batch — save each memory immediately. Do NOT wait for the user to ask.
+8. Mark Phase 8 as `completed`
 
 ## Autonomous Loop Patterns
 
@@ -530,6 +533,7 @@ If any exit condition triggers without resolution → cook emits `BLOCKED` statu
 
 ## Calls (outbound)
 
+- `neural-memory` (external): Phase 0 (resume) + Phase 8 (complete) — Recall project context at start, capture learnings at end
 - `sentinel-env` (L3): Phase 0.5 — environment pre-flight (first run only)
 - `scout` (L2): Phase 1 — scan codebase before planning
 - `onboard` (L2): Phase 1 — if no CLAUDE.md exists, initialize project context first

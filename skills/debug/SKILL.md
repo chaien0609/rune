@@ -42,6 +42,7 @@ If root cause cannot be identified after 3 hypothesis cycles:
 - `problem-solver` (L3): structured reasoning (5 Whys, Fishbone) for complex bugs
 - `browser-pilot` (L3): capture browser console errors, network failures, visual bugs
 - `sequential-thinking` (L3): multi-variable root cause analysis
+- `neural-memory` (L3): after root cause found — capture error pattern for future recognition
 
 ## Called By (inbound)
 
@@ -129,6 +130,10 @@ Narrow to the single actual cause.
 - State the confirmed hypothesis and the exact evidence that proves it
 - Identify the specific file, line number, and code construct responsible
 - Note any contributing factors (environment, data, timing, config)
+
+### Step 5b: Capture Error Pattern
+
+Call `neural-memory` (Capture Mode) to save the error pattern: root cause, symptoms, and fix approach. Tag with [project-name, error, technology].
 
 ### Step 6: 3-Fix Escalation Rule
 

@@ -133,10 +133,13 @@ These are rarely invoked directly — they're called by Tier 1/2 skills:
 | `rune:completion-gate` | cook | Validate claims |
 | `rune:sentinel-env` | cook, scaffold, onboard | Environment pre-flight |
 | `rune:research` / `rune:docs-seeker` | any | Look up docs |
-| `rune:session-bridge` | cook, team | Save context |
+| `rune:session-bridge` | cook, team | Save context (in-session state handoff) |
+| `rune:journal` | cook, team | Persistent work log within a session |
+| `rune:neural-memory` | cook, team, any L1/L2 | Cross-session cognitive persistence via Neural Memory MCP — semantic complement to session-bridge and journal |
 | `rune:git` | cook, scaffold, team, launch | Semantic commits, PRs, branches |
 | `rune:doc-processor` | docs, marketing | PDF/DOCX/XLSX/PPTX generation |
 | "Done" / "ship it" / "xong" | — | `rune:verification` → commit |
+| "recall", "remember", "brain", "nmem", "cross-project memory" | `rune:neural-memory` | Retrieve or persist cross-session context |
 
 #### Tier 4 — Domain Extension Packs (L4)
 
@@ -208,6 +211,19 @@ Once routed:
 2. Invoke the skill via Skill tool
 3. Follow the skill's workflow exactly
 4. If the skill has a checklist/phases, track via TodoWrite
+
+### Step 5 — Post-Completion Neural Memory Capture
+
+After ANY L1 or L2 workflow completes (cook, team, launch, rescue, scaffold, plan, design, debug, fix, review, deploy, sentinel, perf, db, ba, docs, mcp-builder, etc.):
+
+1. Trigger `rune:neural-memory` in **Capture Mode** automatically
+2. Save 2–5 memories covering: key decisions made, bugs fixed, patterns applied, architectural choices
+3. Use rich cognitive language (causal, temporal, decisional) — NOT flat facts
+4. Tag memories with [project-name, skill-used, topic]
+5. This step is MANDATORY even if the user did not ask for it
+6. Exception: skip if the workflow produced zero technical output (e.g., only a clarifying question was asked)
+
+**Capture Mode trigger phrase**: "Session artifact — capturing to Neural Memory."
 
 ## Routing Exceptions
 

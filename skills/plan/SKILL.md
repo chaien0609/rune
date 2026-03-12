@@ -88,6 +88,7 @@ High-level multi-feature planning — organize features into milestones.
 - `research` (L3): external knowledge lookup
 - `sequential-thinking` (L3): complex architecture with many trade-offs
 - L4 extension packs: domain-specific architecture patterns
+- `neural-memory` | Before architecture decisions | Recall past decisions on similar problems
 
 ## Called By (inbound)
 
@@ -112,6 +113,8 @@ High-level multi-feature planning — organize features into milestones.
 **Check for Requirements Document first**: Use `Glob` to check for `.rune/features/*/requirements.md`. If a Requirements Document exists (produced by `rune:ba`), read it and use it as the primary input — it contains user stories, acceptance criteria, scope, and constraints. Do NOT re-gather requirements that BA already elicited.
 
 Use findings from `rune:scout` if already available. If not, invoke `rune:scout` with the project root to scan directory structure, detect framework, identify key files, and extract existing patterns. Do NOT skip this step — plans without context produce wrong file paths.
+
+Call `neural-memory` (Recall Mode) to check for past architecture decisions on similar problems before making new ones.
 
 ### Step 2 — Classify Complexity
 

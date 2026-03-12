@@ -41,6 +41,7 @@ Every review MUST cite at least one specific concern, suggestion, or explicit ap
 - `review-intake` (L2): structured intake for complex multi-file reviews
 - `sast` (L3): static analysis security scan on reviewed code
 - L4 extension packs: domain-specific review patterns when context matches (e.g., @rune/ui for frontend, @rune/security for auth code)
+- `neural-memory` | After review complete | Capture code quality insight
 
 ## Called By (inbound)
 
@@ -181,6 +182,7 @@ After reporting:
 - If any CRITICAL findings: call `rune:fix` immediately with the finding details
 - If any HIGH findings: call `rune:fix` with the finding details
 - If untested code: call `rune:test` with specific coverage gaps identified
+- Call `neural-memory` (Capture Mode) to save any novel code quality patterns or recurring issues found.
 
 ## Framework-Specific Checks
 

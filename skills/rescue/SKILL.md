@@ -40,6 +40,7 @@ Legacy refactoring orchestrator for safely modernizing messy codebases. Rescue r
 - `session-bridge` (L3): save rescue state between sessions
 - `onboard` (L2): generate context for unfamiliar legacy project
 - `dependency-doctor` (L3): audit dependencies in legacy project
+- `neural-memory` | Phase start + phase end | Recall past refactoring patterns, capture new ones
 
 ## Called By (inbound)
 
@@ -71,6 +72,8 @@ Note: SURGERY todos are added dynamically — one per module identified in Phase
 ### Phase 0 — RECON
 
 Mark todo[0] `in_progress`.
+
+Call `neural-memory` (Recall Mode) for past refactoring patterns in similar codebases.
 
 **0a. Full health assessment.**
 
@@ -343,6 +346,8 @@ REQUIRED SUB-SKILL: rune:journal
 
 Bash: git tag rune-rescue-complete
 ```
+
+Call `neural-memory` (Capture Mode) to save refactoring patterns and decisions from this rescue.
 
 Mark VERIFY todo `completed`.
 

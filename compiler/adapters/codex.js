@@ -59,7 +59,7 @@ export default {
     return [
       '',
       '---',
-      '> **Rune Skill Mesh** — 57 skills, 200+ connections',
+      '> **Rune Skill Mesh** — 58 skills, 200+ connections',
       '> Source: https://github.com/rune-kit/rune',
       '> Full experience with subagents, hooks, adaptive routing → use Rune on Claude Code.',
     ].join('\n');

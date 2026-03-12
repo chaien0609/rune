@@ -124,15 +124,29 @@ export async function buildAll({ runeRoot, outputRoot, adapter, disabledSkills =
 
       const { header, body, footer } = transformSkill(parsed, adapter);
       const output = [header, body, footer].filter(Boolean).join('\n');
-      const fileName = outputFileName(parsed.name, adapter);
-      const outputPath = path.join(outputDir, fileName);
+
+      let outputPath;
+      let displayName;
+
+      if (adapter.useSkillDirectories) {
+        // Directory-per-skill: .codex/skills/rune-{name}/SKILL.md
+        const dirName = `${adapter.skillPrefix}${parsed.name}`;
+        const skillDir = path.join(outputDir, dirName);
+        await mkdir(skillDir, { recursive: true });
+        outputPath = path.join(skillDir, adapter.skillFileName || 'SKILL.md');
+        displayName = `${dirName}/${adapter.skillFileName || 'SKILL.md'}`;
+      } else {
+        const fileName = outputFileName(parsed.name, adapter);
+        outputPath = path.join(outputDir, fileName);
+        displayName = fileName;
+      }
 
       await writeFile(outputPath, output, 'utf-8');
 
       stats.skillCount++;
       stats.crossRefsResolved += parsed.crossRefs.length;
       stats.toolRefsResolved += parsed.toolRefs.length;
-      stats.files.push(fileName);
+      stats.files.push(displayName);
     } catch (err) {
       stats.errors.push({ file: skillPath, error: err.message });
     }
@@ -146,13 +160,26 @@ export async function buildAll({ runeRoot, outputRoot, adapter, disabledSkills =
       const { header, body, footer } = transformSkill(parsed, adapter);
       const output = [header, body, footer].filter(Boolean).join('\n');
       const packName = path.basename(path.dirname(packPath));
-      const fileName = outputFileName(`ext-${packName}`, adapter);
-      const outputPath = path.join(outputDir, fileName);
+
+      let outputPath;
+      let displayName;
+
+      if (adapter.useSkillDirectories) {
+        const dirName = `${adapter.skillPrefix}ext-${packName}`;
+        const packDir = path.join(outputDir, dirName);
+        await mkdir(packDir, { recursive: true });
+        outputPath = path.join(packDir, adapter.skillFileName || 'SKILL.md');
+        displayName = `${dirName}/${adapter.skillFileName || 'SKILL.md'}`;
+      } else {
+        const fileName = outputFileName(`ext-${packName}`, adapter);
+        outputPath = path.join(outputDir, fileName);
+        displayName = fileName;
+      }
 
       await writeFile(outputPath, output, 'utf-8');
 
       stats.packCount++;
-      stats.files.push(fileName);
+      stats.files.push(displayName);
     } catch (err) {
       stats.errors.push({ file: packPath, error: err.message });
     }

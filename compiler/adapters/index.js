@@ -10,6 +10,7 @@ import windsurf from './windsurf.js';
 import antigravity from './antigravity.js';
 import generic from './generic.js';
 import openclaw from './openclaw.js';
+import codex from './codex.js';
 
 const adapters = {
   claude,
@@ -18,6 +19,7 @@ const adapters = {
   antigravity,
   generic,
   openclaw,
+  codex,
 };
 
 /**

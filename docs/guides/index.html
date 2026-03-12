@@ -480,6 +480,7 @@
         <a href="#ide-cursor" class="sidebar-link">Cursor</a>
         <a href="#ide-windsurf" class="sidebar-link">Windsurf</a>
         <a href="#ide-antigravity" class="sidebar-link">Antigravity</a>
+        <a href="#ide-codex" class="sidebar-link">OpenAI Codex</a>
       </div>
 
       <div class="sidebar-group">
@@ -968,6 +969,37 @@
         <div class="code-block"><span class="cmd">npx --yes @rune-kit/rune init <span class="flag">--platform antigravity</span></span>
 
 <span class="comment"># Skills appear in .agent/rules/rune/</span></div>
+      </div>
+
+      <h2 id="ide-codex">OpenAI Codex</h2>
+
+      <p>
+        OpenAI Codex uses a <strong>directory-per-skill</strong> structure inside <code>.codex/skills/</code>.
+        Each skill gets its own folder with a <code>SKILL.md</code> file — similar to Rune's native format.
+      </p>
+
+      <div class="code-wrapper">
+        <div class="code-block"><span class="cmd">npx --yes @rune-kit/rune init <span class="flag">--platform codex</span></span>
+
+<span class="comment"># Output structure:</span>
+<span class="output">  .codex/skills/</span>
+<span class="output">  ├── rune-cook/SKILL.md</span>
+<span class="output">  ├── rune-debug/SKILL.md</span>
+<span class="output">  ├── rune-fix/SKILL.md</span>
+<span class="output">  ├── rune-plan/SKILL.md</span>
+<span class="output">  ├── rune-test/SKILL.md</span>
+<span class="output">  └── ... (57 skills total)</span></div>
+      </div>
+
+      <p>
+        Codex skills use <strong>YAML frontmatter</strong> with <code>name</code> and <code>description</code> fields,
+        matching Codex's native skill format. The compiler also maps tool names to
+        Codex-compatible descriptions (e.g., <code>Read</code> → <code>read the file</code>).
+      </p>
+
+      <div class="callout callout-info">
+        <strong>Codex project config:</strong> Codex uses <code>AGENTS.md</code> (equivalent to Claude's <code>CLAUDE.md</code>).
+        Rune skills work alongside your existing <code>AGENTS.md</code> without conflicts.
       </div>
 
       <div class="callout callout-info">

@@ -83,6 +83,19 @@ THEN: Fast Mode activated
 **Announce fast mode**: "Fast mode: small change detected (<30 LOC, single file, non-security). Streamlined pipeline."
 **Override**: User can say "full pipeline" to force all phases even on small changes.
 
+## Phase 0.5: ENVIRONMENT CHECK (First Run Only)
+
+**Goal**: Verify the developer's environment can run this project before wasting time on planning.
+
+**SUB-SKILL**: Use `rune:sentinel-env`
+
+**Auto-trigger conditions** (ALL must be true):
+- No `.rune/` directory exists (first cook run in this project)
+- OR `npm install` / `pip install` / build just failed with environment-looking errors
+- AND NOT fast mode
+
+Skip silently on subsequent runs. User can force with `/rune env-check`.
+
 ## Phase 1: UNDERSTAND
 
 **Goal**: Know what exists before changing anything.
@@ -199,6 +212,25 @@ This phase is lightweight — a Read + pattern match, not a full scan. It does N
 7. Mark Phase 2 as `completed`
 
 **Gate**: User MUST approve the plan before proceeding. Do NOT skip this.
+
+## Phase 2.5: ADVERSARY (Red-Team Challenge)
+
+**Goal**: Stress-test the approved plan BEFORE writing code — catch flaws at plan time, not implementation time.
+
+**REQUIRED SUB-SKILL**: Use `rune:adversary`
+
+1. **Skip conditions** (do NOT run adversary for):
+   - Bug fixes or hotfixes (plan is "fix the bug", nothing to challenge)
+   - Simple refactors (< 3 files, no new logic)
+   - Fast mode (user explicitly opted for speed)
+2. **Run adversary** on the approved plan:
+   - Full Red-Team mode for new features, architectural changes, security-sensitive plans
+   - Quick Challenge mode for smaller plans (< 3 files, no auth/payment)
+3. **Handle verdict**:
+   - **REVISE** → return to Phase 2 (PLAN) with adversary findings as constraints. User must re-approve.
+   - **HARDEN** → present remediations to user, update plan inline, then proceed to Phase 3
+   - **PROCEED** → pass findings as implementation notes to Phase 3
+4. **Max 1 REVISE loop** per cook session — if the revised plan also gets REVISE, ask user to decide
 
 ### Phase-Aware Execution (Master Plan + Phase Files)
 
@@ -498,11 +530,13 @@ If any exit condition triggers without resolution → cook emits `BLOCKED` statu
 
 ## Calls (outbound)
 
+- `sentinel-env` (L3): Phase 0.5 — environment pre-flight (first run only)
 - `scout` (L2): Phase 1 — scan codebase before planning
 - `onboard` (L2): Phase 1 — if no CLAUDE.md exists, initialize project context first
 - `plan` (L2): Phase 2 — create implementation plan
 - `brainstorm` (L2): Phase 2 — trade-off analysis when multiple approaches exist
 - `design` (L2): Phase 2 — UI/design phase when building frontend features
+- `adversary` (L2): Phase 2.5 — red-team challenge on approved plan before implementation
 - `test` (L2): Phase 3 — write failing tests (RED phase)
 - `fix` (L2): Phase 4 — implement code changes (GREEN phase)
 - `debug` (L2): Phase 4 — when implementation hits unexpected errors (max 3 loops)
@@ -542,6 +576,7 @@ If any exit condition triggers without resolution → cook emits `BLOCKED` statu
 | Resume Gate | Phase 0 checks for existing master plan before starting | Proceed to Phase 1 if no plan exists |
 | Scout Gate | scout output (files examined, patterns found) before Phase 2 | Invoke rune:scout first |
 | Plan Gate | User-approved plan with file paths before Phase 3 | Cannot proceed to TEST |
+| Adversary Gate | adversary verdict (PROCEED/HARDEN) before Phase 3 for features | Skip for bugfix/hotfix/refactor/fast-mode |
 | Phase File Gate | Current phase file loaded (not full plan) for multi-session | Load only the active phase file |
 | Test-First Gate | Failing tests exist before Phase 4 IMPLEMENT | Write tests first or get explicit skip from user |
 | Quality Gate | preflight + sentinel + review passed before Phase 7 COMMIT | Fix findings, re-run |

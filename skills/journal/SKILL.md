@@ -104,6 +104,11 @@ For each architectural decision or trade-off made during this session (applies t
 
 ## Consequences
 [Impact on files/modules/future work — include rollback path if relevant]
+
+## Rejected Alternatives
+[List what was considered but NOT chosen, and why. This prevents future sessions from re-visiting dead ends.]
+- **[Alternative A]**: Rejected because [specific reason — constraint, performance, complexity]
+- **[Alternative B]**: Rejected because [specific reason]. May reconsider if [condition changes].
 ```
 
 ### Step 4 — Update dependency graph

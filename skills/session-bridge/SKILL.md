@@ -143,7 +143,25 @@ Use `Edit` to append a one-line entry to `.rune/session-log.md`:
 [YYYY-MM-DD HH:MM] — [brief description of session accomplishments]
 ```
 
-#### Step 6 — Commit
+#### Step 6 — Cross-Project Knowledge Extraction (Neural Memory Bridge)
+
+Before committing, extract generalizable patterns from this session for cross-project reuse:
+
+1. Review the session's decisions, conventions, and completed tasks
+2. Identify 1-3 patterns that are NOT project-specific but would help in OTHER projects:
+   - Technology choices with reasoning ("Chose Redis over Memcached because X")
+   - Architecture patterns ("Fan-out queue pattern solved Y")
+   - Failure modes discovered ("React 19 useEffect cleanup breaks when Z")
+   - Performance insights ("N+1 query pattern in Prisma solved by include")
+3. For each generalizable pattern, save to Neural Memory:
+   - Use `nmem_remember` with rich cognitive language (causal, comparative, decisional)
+   - Tags: `[cross-project, <technology>, <pattern-type>]`
+   - Priority: 6-7 (important enough to surface in other projects)
+4. Skip if session was purely project-specific (config changes, bug fixes with no transferable insight)
+
+**Why**: This turns every project session into learning that compounds across ALL projects. A pattern discovered in Project A auto-surfaces when Project B faces a similar problem.
+
+#### Step 7 — Commit
 
 Stage and commit all updated state files:
 

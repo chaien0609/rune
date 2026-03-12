@@ -58,6 +58,12 @@ Before standard routing, check if adaptive routing rules exist:
 - Overrides MUST NOT route to non-existent skills
 - If an override seems wrong, announce it and let user decide to keep or disable
 
+**Model hint support** (Adaptive Model Re-balancing):
+- Override entries may include `"model_hint": "opus"` — this signals that a skill previously failed at sonnet-level and needed opus reasoning depth
+- When a model_hint is present, announce: "Adaptive routing: this skill previously required opus-level reasoning for [context]. Escalating model."
+- Model hints are written by cook Phase 8 when debug-fix loops hit max retries on the same error pattern
+- Model hints do NOT override explicit user model preferences
+
 ### Step 0.5 — STOP before responding
 
 Before generating ANY response (including clarifying questions), the agent MUST:
@@ -111,6 +117,7 @@ For users who know exactly what they want:
 | Gather requirements / BA / elicit needs | `rune:ba` | L2 — requires opus |
 | Generate / update docs | `rune:docs` | L2 |
 | Build MCP server | `rune:mcp-builder` | L2 |
+| Red-team / challenge a plan / stress-test | `rune:adversary` | L2 — requires opus |
 
 #### Tier 3 — Internal Skills (Called by Other Skills)
 
@@ -124,6 +131,7 @@ These are rarely invoked directly — they're called by Tier 1/2 skills:
 | `rune:verification` | cook, fix | Run lint/test/build |
 | `rune:hallucination-guard` | cook, fix | Verify imports |
 | `rune:completion-gate` | cook | Validate claims |
+| `rune:sentinel-env` | cook, scaffold, onboard | Environment pre-flight |
 | `rune:research` / `rune:docs-seeker` | any | Look up docs |
 | `rune:session-bridge` | cook, team | Save context |
 | `rune:git` | cook, scaffold, team, launch | Semantic commits, PRs, branches |

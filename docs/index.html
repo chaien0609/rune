@@ -205,7 +205,7 @@ D &harr; E &harr; F
         <div class="feature-card">
           <div class="feature-icon">&#127760;</div>
           <h3>Multi-Platform</h3>
-          <p>Same 55 skills compile to Claude Code, Cursor, Windsurf, Antigravity, and generic. Zero knowledge loss across IDEs.</p>
+          <p>Same 55 skills compile to Claude Code, Cursor, Windsurf, Antigravity, OpenClaw, and generic. Zero knowledge loss across IDEs.</p>
         </div>
       </div>
     </div>
@@ -235,9 +235,27 @@ D &harr; E &harr; F
   <!-- PRICING -->
   <section class="section section-dark" id="pricing">
     <div class="container">
-      <h2>Free &amp; Pro</h2>
-      <p class="section-sub">The full development mesh is free forever. Pro adds business department skills for teams that ship products.</p>
-      <div class="pricing-grid">
+      <h2>Pick Your Pack</h2>
+      <p class="section-sub">The full development mesh is free forever. Pro and Business add department-specific skills for teams that ship products.</p>
+
+      <!-- Who needs what -->
+      <div class="pricing-personas">
+        <div class="persona-card">
+          <div class="persona-icon">&#9997;</div>
+          <p><strong>Solo dev or open-source contributor?</strong> Free has everything you need. 55 skills, full mesh, all platforms.</p>
+        </div>
+        <div class="persona-card">
+          <div class="persona-icon">&#9881;</div>
+          <p><strong>Shipping a product with a team?</strong> Pro adds Product, Sales, Data Science, and Support workflows to your AI assistant.</p>
+        </div>
+        <div class="persona-card">
+          <div class="persona-icon">&#127970;</div>
+          <p><strong>Running a company?</strong> Business adds Finance, Legal, HR, and Enterprise Search on top of Pro.</p>
+        </div>
+      </div>
+
+      <div class="pricing-grid pricing-grid-3">
+        <!-- FREE -->
         <div class="pricing-card pricing-free">
           <div class="pricing-tier">
             <span class="pricing-badge pricing-badge-free">MIT License</span>
@@ -245,40 +263,181 @@ D &harr; E &harr; F
             <div class="pricing-price">Free<span class="pricing-forever"> forever</span></div>
           </div>
           <p class="pricing-desc">Everything you need to build, test, deploy, and maintain software.</p>
+          <p class="pricing-who">Best for: individual developers, open-source projects, learning AI-assisted coding.</p>
           <ul class="pricing-features">
             <li>55 core skills (L0&ndash;L3)</li>
             <li>12 domain extension packs</li>
             <li>200+ mesh connections</li>
             <li>5-layer architecture</li>
-            <li>Multi-platform compiler</li>
+            <li>Multi-platform compiler (6 targets)</li>
             <li>Phase-aware execution</li>
             <li>Security gates (sentinel, sast)</li>
             <li>Adaptive model routing</li>
             <li>Session persistence</li>
+            <li>Context delegation (spawn-agent)</li>
             <li>Community support</li>
           </ul>
           <a href="#install" class="btn btn-primary" style="width:100%">Get Started</a>
         </div>
+
+        <!-- PRO -->
         <div class="pricing-card pricing-pro">
           <div class="pricing-tier">
             <span class="pricing-badge pricing-badge-pro">Premium</span>
             <h3>Rune Pro</h3>
-            <div class="pricing-price">$49<span class="pricing-period"> once</span></div>
+            <div class="pricing-price">$49<span class="pricing-period"> lifetime</span></div>
           </div>
-          <p class="pricing-desc">Business department packs that turn your AI assistant into a cross-functional teammate. Pay once, use forever.</p>
+          <p class="pricing-desc">Business department skills that turn your AI assistant into a cross-functional teammate.</p>
+          <p class="pricing-who">Best for: product teams, startups, SaaS companies shipping features to real users.</p>
           <ul class="pricing-features">
             <li><strong>Everything in Free, plus:</strong></li>
-            <li>Product Management &mdash; PRDs, roadmaps, KPI tracking, release notes</li>
-            <li>Sales Enablement &mdash; account research, outreach, pipeline review</li>
+            <li>Product Management &mdash; PRDs, roadmaps, KPI tracking, release comms</li>
+            <li>Sales Enablement &mdash; account research, outreach sequences, pipeline review</li>
             <li>Data Science &mdash; exploration, advanced SQL, dashboards, ML eval</li>
             <li>Customer Support &mdash; ticket triage, knowledge base, escalation</li>
             <li>Business memory layer &mdash; stakeholders, glossary, processes</li>
             <li>MCP connector templates &mdash; Slack, CRM, Linear, Notion</li>
-            <li>All future updates included</li>
+            <li>All future Pro packs included</li>
           </ul>
-          <a href="https://github.com/sponsors/rune-kit" class="btn btn-pro" target="_blank" rel="noopener" style="width:100%">Get Rune Pro</a>
-          <p class="pricing-upgrade">Need Finance, Legal, HR, Enterprise Search? <strong>Rune Business &mdash; $149</strong></p>
+          <a href="https://github.com/sponsors/rune-kit" class="btn btn-pro" target="_blank" rel="noopener" style="width:100%">Get Rune Pro &mdash; $49</a>
+          <p class="pricing-note">Pay once, use forever. No subscriptions.</p>
         </div>
+
+        <!-- BUSINESS -->
+        <div class="pricing-card pricing-biz">
+          <div class="pricing-tier">
+            <span class="pricing-badge pricing-badge-biz">Enterprise</span>
+            <h3>Rune Business</h3>
+            <div class="pricing-price">$149<span class="pricing-period"> lifetime</span></div>
+          </div>
+          <p class="pricing-desc">Full department coverage for companies that need AI assistance across every business function.</p>
+          <p class="pricing-who">Best for: scaling companies, agencies, enterprises with cross-department AI workflows.</p>
+          <ul class="pricing-features">
+            <li><strong>Everything in Pro, plus:</strong></li>
+            <li>Finance Ops &mdash; invoicing, expense tracking, financial reporting</li>
+            <li>Legal &amp; Compliance &mdash; contract review, policy drafting, audit prep</li>
+            <li>HR &amp; Recruiting &mdash; job descriptions, candidate screening, onboarding</li>
+            <li>Enterprise Search &mdash; cross-system knowledge retrieval</li>
+            <li>Custom Skill Forge &mdash; build private skills for your organization</li>
+            <li>Priority support &mdash; direct access to maintainers</li>
+            <li>All future Business packs included</li>
+          </ul>
+          <a href="https://github.com/sponsors/rune-kit" class="btn btn-biz" target="_blank" rel="noopener" style="width:100%">Get Rune Business &mdash; $149</a>
+          <p class="pricing-note">Pay once, use forever. No subscriptions.</p>
+        </div>
+      </div>
+
+      <!-- Comparison table -->
+      <div class="pricing-compare">
+        <h3>Feature Comparison</h3>
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Capability</th>
+              <th>Free</th>
+              <th>Pro <span class="table-price">$49</span></th>
+              <th>Business <span class="table-price">$149</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Core dev skills (55)</td>
+              <td class="check">&#10003;</td>
+              <td class="check">&#10003;</td>
+              <td class="check">&#10003;</td>
+            </tr>
+            <tr>
+              <td>Domain packs (12)</td>
+              <td class="check">&#10003;</td>
+              <td class="check">&#10003;</td>
+              <td class="check">&#10003;</td>
+            </tr>
+            <tr>
+              <td>Multi-platform compiler</td>
+              <td class="check">&#10003;</td>
+              <td class="check">&#10003;</td>
+              <td class="check">&#10003;</td>
+            </tr>
+            <tr>
+              <td>Security gates &amp; SAST</td>
+              <td class="check">&#10003;</td>
+              <td class="check">&#10003;</td>
+              <td class="check">&#10003;</td>
+            </tr>
+            <tr>
+              <td>Product Management</td>
+              <td class="dash">&mdash;</td>
+              <td class="check">&#10003;</td>
+              <td class="check">&#10003;</td>
+            </tr>
+            <tr>
+              <td>Sales Enablement</td>
+              <td class="dash">&mdash;</td>
+              <td class="check">&#10003;</td>
+              <td class="check">&#10003;</td>
+            </tr>
+            <tr>
+              <td>Data Science</td>
+              <td class="dash">&mdash;</td>
+              <td class="check">&#10003;</td>
+              <td class="check">&#10003;</td>
+            </tr>
+            <tr>
+              <td>Customer Support</td>
+              <td class="dash">&mdash;</td>
+              <td class="check">&#10003;</td>
+              <td class="check">&#10003;</td>
+            </tr>
+            <tr>
+              <td>Business memory layer</td>
+              <td class="dash">&mdash;</td>
+              <td class="check">&#10003;</td>
+              <td class="check">&#10003;</td>
+            </tr>
+            <tr>
+              <td>MCP connector templates</td>
+              <td class="dash">&mdash;</td>
+              <td class="check">&#10003;</td>
+              <td class="check">&#10003;</td>
+            </tr>
+            <tr>
+              <td>Finance Ops</td>
+              <td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td>
+              <td class="check">&#10003;</td>
+            </tr>
+            <tr>
+              <td>Legal &amp; Compliance</td>
+              <td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td>
+              <td class="check">&#10003;</td>
+            </tr>
+            <tr>
+              <td>HR &amp; Recruiting</td>
+              <td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td>
+              <td class="check">&#10003;</td>
+            </tr>
+            <tr>
+              <td>Enterprise Search</td>
+              <td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td>
+              <td class="check">&#10003;</td>
+            </tr>
+            <tr>
+              <td>Custom Skill Forge</td>
+              <td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td>
+              <td class="check">&#10003;</td>
+            </tr>
+            <tr>
+              <td>Priority support</td>
+              <td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td>
+              <td class="check">&#10003;</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </section>
@@ -322,7 +481,7 @@ D &harr; E &harr; F
           <span class="stat-label">Extension Packs</span>
         </div>
         <div class="stat">
-          <span class="stat-num" data-target="5">0</span>
+          <span class="stat-num" data-target="6">0</span>
           <span class="stat-label">Platforms</span>
         </div>
       </div>

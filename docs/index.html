@@ -26,6 +26,10 @@
         <a href="#workflows">Workflows</a>
         <a href="guides/">Guides</a>
         <a href="#pricing">Pricing</a>
+        <div class="nav-controls">
+          <button class="theme-toggle" id="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle theme">&#9790;</button>
+          <div id="google_translate_element"></div>
+        </div>
         <a href="https://github.com/rune-kit/rune" class="btn btn-sm" target="_blank" rel="noopener">GitHub</a>
       </div>
     </div>
@@ -502,5 +506,46 @@ D &harr; E &harr; F
   </footer>
 
   <script src="script.js"></script>
+
+  <!-- Theme toggle -->
+  <script>
+    (function initTheme() {
+      const toggle = document.getElementById('theme-toggle');
+      const stored = localStorage.getItem('rune-theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = stored || (prefersDark ? 'dark' : 'dark'); // default dark
+
+      if (theme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+        toggle.innerHTML = '&#9728;'; // sun
+      }
+
+      toggle.addEventListener('click', () => {
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        if (isLight) {
+          document.documentElement.removeAttribute('data-theme');
+          toggle.innerHTML = '&#9790;'; // moon
+          localStorage.setItem('rune-theme', 'dark');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'light');
+          toggle.innerHTML = '&#9728;'; // sun
+          localStorage.setItem('rune-theme', 'light');
+        }
+      });
+    })();
+  </script>
+
+  <!-- Google Translate (free, no API key) -->
+  <script>
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        includedLanguages: 'vi,ja,ko,zh-CN,zh-TW,fr,de,es,pt,ru,ar,hi,th,id',
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+        autoDisplay: false
+      }, 'google_translate_element');
+    }
+  </script>
+  <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>

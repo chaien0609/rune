@@ -10,15 +10,15 @@
     {
       "name": "rune",
       "source": "./",
-      "description": "49 skills wired into a self-aware 5-layer mesh — 170+ connections, adaptive routing, mesh analytics, logic preservation. Use rune:cook for any code task, rune:team for parallel work, rune:launch for deploy, rune:rescue for legacy code. From idea to shipped MVP in one cook invocation.",
-      "strict": false,
+      "description": "58 skills wired into a self-aware 5-layer mesh — 200+ connections, adaptive routing, mesh analytics, logic preservation. Use rune:cook for any code task, rune:team for parallel work, rune:launch for deploy, rune:rescue for legacy code. From idea to shipped MVP in one cook invocation.",
+      "strict": true,
       "author": {
         "name": "Rune Contributors"
       },
       "homepage": "https://github.com/rune-kit/rune",
       "repository": "https://github.com/rune-kit/rune",
       "license": "MIT",
-      "version": "1.5.1",
+      "version": "2.1.1",
       "category": "workflow",
       "tags": ["skills", "orchestration", "mesh", "workflow", "tdd", "security", "debugging", "sast", "pre-commit", "analytics", "adaptive-routing", "logic-preservation"],
       "skills": [
@@ -27,6 +27,7 @@
         "./skills/team",
         "./skills/launch",
         "./skills/rescue",
+        "./skills/scaffold",
         "./skills/plan",
         "./skills/scout",
         "./skills/brainstorm",
@@ -39,6 +40,7 @@
         "./skills/review-intake",
         "./skills/db",
         "./skills/sentinel",
+        "./skills/sentinel-env",
         "./skills/preflight",
         "./skills/onboard",
         "./skills/audit",
@@ -50,6 +52,10 @@
         "./skills/autopsy",
         "./skills/safeguard",
         "./skills/surgeon",
+        "./skills/adversary",
+        "./skills/ba",
+        "./skills/docs",
+        "./skills/mcp-builder",
         "./skills/research",
         "./skills/docs-seeker",
         "./skills/trend-scout",
@@ -64,13 +70,16 @@
         "./skills/context-engine",
         "./skills/journal",
         "./skills/session-bridge",
+        "./skills/neural-memory",
         "./skills/worktree",
         "./skills/watchdog",
         "./skills/scope-guard",
         "./skills/browser-pilot",
         "./skills/asset-creator",
         "./skills/video-creator",
-        "./skills/dependency-doctor"
+        "./skills/dependency-doctor",
+        "./skills/git",
+        "./skills/doc-processor"
       ]
     },
     {
@@ -168,6 +177,14 @@
       "version": "0.1.0",
       "category": "domain",
       "tags": ["analytics", "tracking", "ab-testing", "funnels"]
+    },
+    {
+      "name": "@rune/chrome-ext",
+      "source": "./extensions/chrome-ext",
+      "description": "Chrome Extension — manifest v3, service workers, content scripts, popup UI",
+      "version": "0.1.0",
+      "category": "domain",
+      "tags": ["chrome", "extension", "browser", "manifest-v3"]
     }
   ]
 }

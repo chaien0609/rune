@@ -157,9 +157,13 @@ export async function buildAll({ runeRoot, outputRoot, adapter, disabledSkills =
     try {
       const content = await readFile(packPath, 'utf-8');
       const parsed = parsePack(content, packPath);
+      const packName = path.basename(path.dirname(packPath));
+
+      // Normalize pack name for headers (ext-trading instead of @rune/trading)
+      parsed.name = `ext-${packName}`;
+
       const { header, body, footer } = transformSkill(parsed, adapter);
       const output = [header, body, footer].filter(Boolean).join('\n');
-      const packName = path.basename(path.dirname(packPath));
 
       let outputPath;
       let displayName;
@@ -248,12 +252,12 @@ function generateIndex(stats, adapter) {
     '## Core Skills',
     '',
     ...stats.files
-      .filter(f => !f.includes('ext-') && !f.includes('index'))
+      .filter(f => !f.match(/[-/]ext-/) && !f.includes('index'))
       .map(f => `- ${f}`),
     '',
   ];
 
-  const extFiles = stats.files.filter(f => f.includes('ext-'));
+  const extFiles = stats.files.filter(f => f.match(/[-/]ext-/));
   if (extFiles.length > 0) {
     lines.push('## Extension Packs', '', ...extFiles.map(f => `- ${f}`), '');
   }

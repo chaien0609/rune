@@ -7,7 +7,7 @@
 const DEFAULT_FOOTER = [
   '',
   '---',
-  '> **Rune Skill Mesh** — 49 skills, 170+ connections',
+  '> **Rune Skill Mesh** — 58 skills, 200+ connections',
   '> Source: https://github.com/rune-kit/rune',
   '> For the full experience with subagents, hooks, adaptive routing, and mesh analytics — use Rune as a Claude Code plugin.',
 ].join('\n');

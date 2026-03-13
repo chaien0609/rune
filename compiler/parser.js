@@ -197,6 +197,7 @@ export function parsePack(content, filePath = '') {
     description: frontmatter.description || '',
     version: frontmatter.version || '1.0.0',
     layer: 'L4',
+    group: 'extension',
     body,
     crossRefs: extractCrossRefs(body),
     toolRefs: extractToolRefs(body),

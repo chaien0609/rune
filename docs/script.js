@@ -131,3 +131,147 @@
 
   document.querySelectorAll('.stat-num[data-target]').forEach(el => observer.observe(el));
 })();
+
+// ─── Payment Flow ───
+const PAY_API = 'https://pay.theio.vn';
+const BANK_ID = 'vpbank';
+const BANK_ACCOUNT = '04162263666';
+const ACCOUNT_NAME = 'NGUYEN CONG';
+
+const PRODUCT_INFO = {
+  'rune-pro': {
+    title: 'Get Rune Pro', titleShort: 'Rune Pro',
+    priceVN: '1,190,000 VND', priceIntl: '$49 USD',
+    amountLabel: '1,190,000 VND (~$49 USD)',
+    btnClass: 'btn-pro',
+  },
+  'rune-biz': {
+    title: 'Get Rune Business', titleShort: 'Rune Business',
+    priceVN: '3,590,000 VND', priceIntl: '$149 USD',
+    amountLabel: '3,590,000 VND (~$149 USD)',
+    btnClass: 'btn-biz',
+  },
+};
+
+let payState = { product: null, orderCode: null, pollTimer: null };
+
+function openPayment(product) {
+  const info = PRODUCT_INFO[product];
+  if (!info) return;
+
+  payState = { product, orderCode: null, pollTimer: null };
+
+  document.getElementById('pay-title').textContent = info.title;
+  document.getElementById('pay-title-2').textContent = info.title;
+  document.getElementById('pay-amount-2').textContent = info.amountLabel;
+  document.getElementById('pay-price-vn').textContent = info.priceVN;
+  document.getElementById('pay-price-intl').textContent = info.priceIntl;
+  document.getElementById('pay-github').value = '';
+  document.getElementById('pay-email').value = '';
+  document.getElementById('pay-error').hidden = true;
+
+  const submitBtn = document.getElementById('pay-submit');
+  submitBtn.className = 'btn ' + info.btnClass;
+  submitBtn.style.width = '100%';
+  submitBtn.style.marginTop = '16px';
+
+  showPayStep(1);
+  document.getElementById('pay-modal').hidden = false;
+  document.body.style.overflow = 'hidden';
+}
+
+function closePayment() {
+  document.getElementById('pay-modal').hidden = true;
+  document.body.style.overflow = '';
+  if (payState.pollTimer) {
+    clearInterval(payState.pollTimer);
+    payState.pollTimer = null;
+  }
+}
+
+function showPayStep(n) {
+  for (let i = 1; i <= 4; i++) {
+    document.getElementById('pay-step-' + i).hidden = (i !== n);
+  }
+}
+
+function showVNPayment() {
+  showPayStep(2);
+  document.getElementById('pay-github').focus();
+}
+
+async function createOrder() {
+  const github = document.getElementById('pay-github').value.trim();
+  const email = document.getElementById('pay-email').value.trim();
+  const errorEl = document.getElementById('pay-error');
+
+  if (!github) {
+    errorEl.textContent = 'Please enter your GitHub username';
+    errorEl.hidden = false;
+    return;
+  }
+
+  if (!/^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$/.test(github)) {
+    errorEl.textContent = 'Invalid GitHub username format';
+    errorEl.hidden = false;
+    return;
+  }
+
+  errorEl.hidden = true;
+  const submitBtn = document.getElementById('pay-submit');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Creating order...';
+
+  try {
+    const res = await fetch(PAY_API + '/order/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ product: payState.product, githubUsername: github, email: email || undefined }),
+    });
+
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Failed to create order');
+
+    payState.orderCode = data.orderCode;
+
+    const qrUrl = `https://img.vietqr.io/image/${BANK_ID}-${BANK_ACCOUNT}-compact.png`
+      + `?amount=${data.amount}&addInfo=${encodeURIComponent(data.orderCode)}`
+      + `&accountName=${encodeURIComponent(ACCOUNT_NAME)}`;
+
+    document.getElementById('pay-qr-img').src = qrUrl;
+    document.getElementById('pay-detail-amount').textContent = data.amount.toLocaleString('vi-VN') + ' VND';
+    document.getElementById('pay-detail-code').textContent = data.orderCode;
+
+    showPayStep(3);
+    startPolling(github);
+  } catch (err) {
+    errorEl.textContent = err.message;
+    errorEl.hidden = false;
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Continue to Payment';
+  }
+}
+
+function startPolling(github) {
+  if (payState.pollTimer) clearInterval(payState.pollTimer);
+
+  payState.pollTimer = setInterval(async () => {
+    try {
+      const res = await fetch(PAY_API + '/order/' + payState.orderCode);
+      const data = await res.json();
+
+      if (data.status === 'delivered') {
+        clearInterval(payState.pollTimer);
+        payState.pollTimer = null;
+        document.getElementById('pay-success-user').textContent = github;
+        showPayStep(4);
+      } else if (data.status === 'underpaid') {
+        document.getElementById('pay-status').innerHTML =
+          '<span style="color:var(--loss)">&#9888; Amount too low. Please transfer the exact amount.</span>';
+      }
+    } catch (_) {
+      // silent retry
+    }
+  }, 5000);
+}

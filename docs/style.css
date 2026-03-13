@@ -497,6 +497,84 @@ body { top: 0 !important; }
   pointer-events: none;
 }
 
+/* ─── PAYMENT MODAL ─── */
+.pay-modal { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+.pay-modal[hidden] { display: none; }
+.pay-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); }
+.pay-dialog {
+  position: relative; background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 32px; max-width: 440px; width: 90%;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5); max-height: 90vh; overflow-y: auto;
+}
+.pay-close {
+  position: absolute; top: 12px; right: 16px; background: none; border: none;
+  color: var(--text-muted); font-size: 24px; cursor: pointer; line-height: 1;
+  padding: 4px; transition: color var(--transition);
+}
+.pay-close:hover { color: var(--text-primary); }
+.pay-back {
+  background: none; border: none; color: var(--text-muted); font-size: 14px;
+  cursor: pointer; padding: 0; margin-bottom: 12px; transition: color var(--transition);
+}
+.pay-back:hover { color: var(--text-primary); }
+.pay-step h3 { font-family: var(--font-display); font-size: 22px; margin-bottom: 4px; color: var(--text-primary); }
+.pay-subtitle { font-size: 14px; color: var(--text-secondary); margin-bottom: 20px; }
+
+/* Payment method selector */
+.pay-options { display: flex; flex-direction: column; gap: 12px; }
+.pay-option {
+  display: flex; align-items: center; gap: 14px; padding: 16px;
+  background: var(--bg-base); border: 1px solid var(--border); border-radius: var(--radius-md);
+  cursor: pointer; transition: all var(--transition); text-decoration: none; color: inherit;
+}
+.pay-option:hover { border-color: var(--accent); background: var(--bg-elevated); }
+.pay-option-flag { font-size: 28px; flex-shrink: 0; }
+.pay-option-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.pay-option-info strong { font-size: 15px; color: var(--text-primary); }
+.pay-option-info span { font-size: 12px; color: var(--text-muted); }
+.pay-option-price { font-family: var(--font-mono); font-weight: 700; font-size: 14px !important; color: var(--accent) !important; margin-top: 2px; }
+.pay-option-arrow { font-size: 18px; color: var(--text-muted); flex-shrink: 0; }
+
+/* Form inputs */
+.pay-label { display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+.pay-input {
+  width: 100%; padding: 10px 14px; background: var(--bg-base); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text-primary); font-family: var(--font-mono);
+  font-size: 14px; outline: none; transition: border-color var(--transition); margin-bottom: 14px;
+}
+.pay-input:focus { border-color: var(--accent); }
+.pay-input::placeholder { color: var(--text-muted); }
+.pay-error { color: var(--loss); font-size: 13px; margin-top: 8px; text-align: center; }
+
+/* QR section */
+.pay-qr { text-align: center; margin: 16px 0; }
+.pay-qr img { width: 240px; height: 240px; border-radius: var(--radius-md); background: #fff; }
+.pay-details {
+  background: var(--bg-base); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 14px; margin-bottom: 16px;
+}
+.pay-detail-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 13px; }
+.pay-detail-row span { color: var(--text-muted); }
+.pay-detail-row strong { color: var(--text-primary); }
+.pay-mono { font-family: var(--font-mono); font-size: 13px; }
+.pay-status {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 12px; border-radius: var(--radius-sm); font-size: 14px;
+  background: var(--accent-dim); color: var(--accent); font-weight: 500;
+}
+.pay-spinner {
+  width: 16px; height: 16px; border: 2px solid var(--accent);
+  border-top-color: transparent; border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.pay-hint { font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 12px; line-height: 1.5; }
+.pay-success-icon {
+  width: 64px; height: 64px; border-radius: 50%; background: var(--accent);
+  color: #fff; font-size: 32px; display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px; font-weight: 700;
+}
+
 /* ─── ANIMATIONS ─── */
 @media (prefers-reduced-motion: no-preference) {
   .layer, .feature-card, .workflow-card, .compare-card, .ext-card, .install-card, .pricing-card, .stat {

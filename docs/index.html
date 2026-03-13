@@ -304,7 +304,7 @@ D &harr; E &harr; F
             <li>MCP connector templates &mdash; Slack, CRM, Linear, Notion</li>
             <li>All future Pro packs included</li>
           </ul>
-          <a href="https://github.com/sponsors/rune-kit" class="btn btn-pro" target="_blank" rel="noopener" style="width:100%">Get Rune Pro &mdash; $49</a>
+          <button class="btn btn-pro" style="width:100%" onclick="openPayment('rune-pro')">Get Rune Pro &mdash; $49</button>
           <p class="pricing-note">Pay once, use forever. No subscriptions.</p>
         </div>
 
@@ -327,7 +327,7 @@ D &harr; E &harr; F
             <li>Priority support &mdash; direct access to maintainers</li>
             <li>All future Business packs included</li>
           </ul>
-          <a href="https://github.com/sponsors/rune-kit" class="btn btn-biz" target="_blank" rel="noopener" style="width:100%">Get Rune Business &mdash; $149</a>
+          <button class="btn btn-biz" style="width:100%" onclick="openPayment('rune-biz')">Get Rune Business &mdash; $149</button>
           <p class="pricing-note">Pay once, use forever. No subscriptions.</p>
         </div>
       </div>
@@ -504,6 +504,82 @@ D &harr; E &harr; F
       </div>
     </div>
   </footer>
+
+  <!-- Payment Modal -->
+  <div id="pay-modal" class="pay-modal" hidden>
+    <div class="pay-backdrop" onclick="closePayment()"></div>
+    <div class="pay-dialog">
+      <!-- Step 1: Choose payment method -->
+      <div id="pay-step-1" class="pay-step">
+        <button class="pay-close" onclick="closePayment()" aria-label="Close">&times;</button>
+        <h3 id="pay-title">Get Rune Pro</h3>
+        <p class="pay-subtitle">Choose your payment method</p>
+        <div class="pay-options">
+          <button class="pay-option" onclick="showVNPayment()">
+            <span class="pay-option-flag">&#127483;&#127475;</span>
+            <div class="pay-option-info">
+              <strong>Vietnam</strong>
+              <span>Bank Transfer (VietQR)</span>
+              <span class="pay-option-price" id="pay-price-vn">1,190,000 VND</span>
+            </div>
+            <span class="pay-option-arrow">&rarr;</span>
+          </button>
+          <a id="pay-sponsor-link" href="https://github.com/sponsors/rune-kit" target="_blank" rel="noopener" class="pay-option">
+            <span class="pay-option-flag">&#127760;</span>
+            <div class="pay-option-info">
+              <strong>International</strong>
+              <span>GitHub Sponsors (Stripe)</span>
+              <span class="pay-option-price" id="pay-price-intl">$49 USD</span>
+            </div>
+            <span class="pay-option-arrow">&rarr;</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Step 2: VN — GitHub username -->
+      <div id="pay-step-2" class="pay-step" hidden>
+        <button class="pay-close" onclick="closePayment()" aria-label="Close">&times;</button>
+        <button class="pay-back" onclick="showPayStep(1)" aria-label="Back">&larr; Back</button>
+        <h3 id="pay-title-2">Get Rune Pro</h3>
+        <p class="pay-subtitle" id="pay-amount-2">1,190,000 VND (~$49 USD)</p>
+        <label class="pay-label" for="pay-github">GitHub Username</label>
+        <input type="text" id="pay-github" class="pay-input" placeholder="your-github-username" autocomplete="off" spellcheck="false" />
+        <label class="pay-label" for="pay-email">Email <span style="color:var(--text-muted)">(optional)</span></label>
+        <input type="email" id="pay-email" class="pay-input" placeholder="you@example.com" />
+        <button id="pay-submit" class="btn btn-pro" style="width:100%;margin-top:16px" onclick="createOrder()">Continue to Payment</button>
+        <p class="pay-error" id="pay-error" hidden></p>
+      </div>
+
+      <!-- Step 3: VN — QR Code -->
+      <div id="pay-step-3" class="pay-step" hidden>
+        <button class="pay-close" onclick="closePayment()" aria-label="Close">&times;</button>
+        <h3>Scan to Pay</h3>
+        <p class="pay-subtitle">Transfer the exact amount with the code below</p>
+        <div class="pay-qr">
+          <img id="pay-qr-img" alt="VietQR Payment" />
+        </div>
+        <div class="pay-details">
+          <div class="pay-detail-row"><span>Bank</span><strong>VPBank</strong></div>
+          <div class="pay-detail-row"><span>Account</span><strong class="pay-mono">04162263666</strong></div>
+          <div class="pay-detail-row"><span>Amount</span><strong class="pay-mono" id="pay-detail-amount"></strong></div>
+          <div class="pay-detail-row"><span>Content</span><strong class="pay-mono" id="pay-detail-code"></strong></div>
+        </div>
+        <div class="pay-status" id="pay-status">
+          <span class="pay-spinner"></span> Waiting for payment...
+        </div>
+        <p class="pay-hint">Open your banking app &rarr; Scan QR or transfer manually &rarr; We'll detect it automatically</p>
+      </div>
+
+      <!-- Step 4: Success -->
+      <div id="pay-step-4" class="pay-step" hidden>
+        <div class="pay-success-icon">&#10003;</div>
+        <h3>Payment Received!</h3>
+        <p class="pay-subtitle">A GitHub invitation has been sent to <strong id="pay-success-user"></strong></p>
+        <p class="pay-hint">Check your email for the invitation to <code>rune-kit/rune-pro</code></p>
+        <button class="btn btn-primary" style="width:100%;margin-top:20px" onclick="closePayment()">Done</button>
+      </div>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 

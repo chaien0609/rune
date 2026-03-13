@@ -18,12 +18,12 @@ Every session, research real-world pain points to strengthen existing skills, de
 | @rune/ai-ml | 517 | 6 | Deep | Medium |
 | @rune/gamedev | 393 | 5 | Adequate | High |
 | @rune/content | 381 | 5 | Adequate | High |
-| @rune/ecommerce | 280 | 4 | Thin | High |
-| @rune/saas | 276 | 4 | Thin | High |
-| @rune/mobile | 273 | 4 | Thin | High |
-| @rune/backend | 257 | 4 | Thin | High |
-| @rune/ui | 225 | 3 | Thin | Critical (Phase 4) |
-| @rune/security | 216 | 3 | Thin | High |
+| @rune/ui | 947 | 7 | Deep | Low (enriched) |
+| @rune/saas | 805 | 7 | Deep | Low (enriched) |
+| @rune/ecommerce | 674 | 7 | Deep | Low (enriched) |
+| @rune/backend | 678 | 7 | Deep | Low (enriched) |
+| @rune/mobile | 653 | 7 | Deep | Low (enriched) |
+| @rune/security | 536 | 6 | Deep | Low (enriched) |
 
 ### PRO (4 packs, private repo)
 | Pack | Lines | Skills | Depth Rating |
@@ -81,30 +81,26 @@ Types of enrichment:
 
 ## Enrichment Targets by Priority
 
-### Tier 1: Critical (enrichment doubles value)
+### Tier 1: High (enrichment adds solid value)
 | Target | Current | Goal | Key Pain Points to Research |
 |--------|---------|------|---------------------------|
-| @rune/ui | 225 | 400+ | Design system anti-patterns, Tailwind v4 migration, shadcn/ui patterns |
-| @rune/security | 216 | 400+ | OWASP 2025, supply chain attacks, secret scanning gaps |
-| @rune/backend | 257 | 400+ | API design pain points, auth patterns, rate limiting |
-| @rune/saas | 276 | 400+ | Multi-tenancy, billing integration, feature flags |
+| @rune/gamedev | 393 | 600+ | Unity/Godot workflow, asset pipeline, multiplayer patterns |
+| @rune/content | 381 | 600+ | CMS integration, SEO automation, content pipeline |
 
-### Tier 2: High (enrichment adds solid value)
-| Target | Current | Goal | Key Pain Points to Research |
-|--------|---------|------|---------------------------|
-| @rune/mobile | 273 | 400+ | React Native/Expo gotchas, deep linking, push notifications |
-| @rune/ecommerce | 280 | 400+ | Stripe/payment integration, inventory, cart abandonment |
-| @rune/gamedev | 393 | 500+ | Unity/Godot workflow, asset pipeline, multiplayer patterns |
-| @rune/content | 381 | 500+ | CMS integration, SEO automation, content pipeline |
-
-### Tier 3: Maintain (already deep, refresh only)
+### Tier 2: Maintain (already deep, refresh only)
 | Target | Current | Focus |
 |--------|---------|-------|
+| @rune/chrome-ext | 995 | Chrome API changes, new AI APIs |
+| @rune/ui | 947 | Tailwind v5, new component patterns |
+| @rune/saas | 805 | Multi-tenancy updates, new billing APIs |
+| @rune/backend | 678 | API gateway patterns, new auth standards |
+| @rune/ecommerce | 674 | Payment API changes, new tax regulations |
+| @rune/mobile | 653 | React Native releases, Expo SDK updates |
 | @rune/trading | 597 | API changes, new exchange patterns |
+| @rune/analytics | 557 | New viz libraries, dbt updates |
+| @rune/security | 536 | New CVEs, supply chain attack patterns |
 | @rune/devops | 520 | K8s updates, new CI tools |
 | @rune/ai-ml | 517 | New model architectures, training patterns |
-| @rune/analytics | 557 | New viz libraries, dbt updates |
-| @rune/chrome-ext | 995 | Chrome API changes, new AI APIs |
 
 ### Core Skill Refresh
 | Skill | Focus Area |

@@ -481,6 +481,7 @@
         <a href="#ide-windsurf" class="sidebar-link">Windsurf</a>
         <a href="#ide-antigravity" class="sidebar-link">Antigravity</a>
         <a href="#ide-codex" class="sidebar-link">OpenAI Codex</a>
+        <a href="#ide-opencode" class="sidebar-link">OpenCode</a>
       </div>
 
       <div class="sidebar-group">
@@ -1000,6 +1001,41 @@
       <div class="callout callout-info">
         <strong>Codex project config:</strong> Codex uses <code>AGENTS.md</code> (equivalent to Claude's <code>CLAUDE.md</code>).
         Rune skills work alongside your existing <code>AGENTS.md</code> without conflicts.
+      </div>
+
+      <h2 id="ide-opencode">OpenCode</h2>
+
+      <p>
+        OpenCode is an open-source AI coding agent with 120K+ GitHub stars. It supports
+        <strong>directory-per-skill</strong> <code>SKILL.md</code> format with native subagent support.
+      </p>
+
+      <div class="code-wrapper">
+        <div class="code-block"><span class="comment"># Build Rune skills for OpenCode</span>
+<span class="cmd">npx @rune-kit/rune build <span class="flag">--platform opencode</span> <span class="flag">--output .</span></span>
+
+<span class="comment"># Or initialize with auto-detection</span>
+<span class="cmd">npx @rune-kit/rune init</span>
+
+<span class="comment"># Output structure:</span>
+<span class="output">  .opencode/</span>
+<span class="output">  └── skills/</span>
+<span class="output">      ├── rune-cook/</span>
+<span class="output">      │   └── SKILL.md</span>
+<span class="output">      ├── rune-plan/</span>
+<span class="output">      │   └── SKILL.md</span>
+<span class="output">      └── ...</span></div>
+      </div>
+
+      <p>
+        OpenCode preserves <strong>native subagent support</strong> — parallel agents are kept as true
+        parallel invocations rather than collapsed to sequential steps. The compiler also generates
+        an <code>AGENTS.md</code> file for project-level context.
+      </p>
+
+      <div class="callout callout-info">
+        <strong>Note:</strong> OpenCode also searches <code>.claude/skills/</code> and
+        <code>.agents/skills/</code> — so Claude-compatible skill formats work too.
       </div>
 
       <div class="callout callout-info">

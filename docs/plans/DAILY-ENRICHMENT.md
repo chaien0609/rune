@@ -52,7 +52,10 @@ Types of enrichment:
 5. **Update deprecated patterns** — replace outdated APIs/approaches
 6. **Add new skills** — when a clear skill-shaped gap exists in a pack
 
-### Step 5: Validate + Commit
+### Step 5: Save Unused Insights
+After enriching, check if research yielded patterns NOT yet applied. If yes → add to **Backlog** section below with source, target skill/pack, and 1-line description. This prevents wasted research.
+
+### Step 6: Validate + Commit
 - Verify enrichment exceeds depth standard (lines, steps, artifacts)
 - Cross-check no regression in existing skills
 - Commit with `feat(pack): enrich <pack> — <what changed>`
@@ -87,6 +90,18 @@ Types of enrichment:
 ## Weekly Metrics
 
 Track in **dashboard.html** (Enrichment Progress tab). No separate log file needed.
+
+## Enrichment Backlog (unused insights from past research)
+
+Patterns extracted from repos but not yet applied. Pick from here before researching new repos.
+
+| Insight | Source Repo | Target | Description | Priority |
+|---------|-------------|--------|-------------|----------|
+| MCP approval flow | blitzdotdev/blitz-mac | `mcp-builder` (L2) | Continuation-based suspend for mutating tools, category classification (query=auto, mutation=confirm), pre-navigation before approval dialog | High |
+| Output verification discipline | HKUDS/CLI-Anything | `verification` (L3) or `test` (L2) | "Never trust exit 0" — verify actual artifacts: magic bytes for PDFs, ZIP structure for DOCX, pixel analysis for images, RMS levels for audio | High |
+| Self-host + SaaS toggle | FujiwaraChoki/supoclip | `@rune/saas` | Single `SELF_HOST=true` env var bypasses billing, dual auth paths (JWT for paid, header for self-hosted). Pattern for OSS→SaaS products | Medium |
+| Credit billing with AI cost passthrough | mendableai/firecrawl | `@rune/saas` | Dynamic credit calculation: base cost × engine multiplier × format multiplier + extras. AI token cost → user credits via `Math.ceil(totalCost * 1800)` | Medium |
+| CLAUDE.md template injection | blitzdotdev/blitz-mac | `scaffold` (L1) or `onboard` (L2) | Bake opinionated agent instructions into scaffolded projects — mandatory first action, ordered build workflow, guards against common failure modes | Low |
 
 ## Anti-Patterns (NEVER do these)
 

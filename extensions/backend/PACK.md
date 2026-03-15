@@ -1,9 +1,9 @@
 ---
 name: "@rune/backend"
-description: Backend patterns — API design, authentication, database patterns, middleware architecture, caching strategies, and background job processing.
+description: Backend patterns — API design, authentication, database patterns, middleware architecture, caching strategies, background job processing, CLI generation, and async processing pipelines.
 metadata:
   author: runedev
-  version: "0.2.0"
+  version: "0.3.0"
   layer: L4
   price: "free"
   target: Backend developers
@@ -24,6 +24,8 @@ Backend codebases accumulate structural debt across six areas: inconsistent API 
 - `/rune middleware-patterns` — audit and fix middleware stack
 - `/rune caching-patterns` — audit and implement caching strategy
 - `/rune background-jobs` — identify async operations and implement job queues
+- `/rune cli-generation` — generate production CLI for existing backend services
+- `/rune async-pipeline` — build multi-stage async processing pipelines with waterfall fallback
 - Called by `cook` (L1) when backend task is detected
 - Called by `review` (L2) when API/backend code is under review
 
@@ -612,6 +614,322 @@ def send_email(self, to: str, template: str, data: dict) -> dict:
 
 ---
 
+### cli-generation
+
+Generate production-grade CLI wrappers for backend services — command groups, dual output mode (human + JSON), stateful REPL, session management with undo/redo, and pip/npm-installable packaging.
+
+#### Workflow
+
+**Step 1 — Analyze backend service surface**
+Map existing API endpoints, service methods, or data models to CLI command groups:
+```typescript
+interface CLICommandGroup {
+  name: string;          // e.g., 'users', 'orders', 'config'
+  source: string;        // API route file or service class
+  commands: CLICommand[];
+}
+
+interface CLICommand {
+  name: string;          // e.g., 'list', 'create', 'delete'
+  sourceMethod: string;  // e.g., 'UserService.findAll'
+  params: CLIParam[];
+  mutating: boolean;     // true = needs confirmation/undo support
+}
+```
+
+**Step 2 — Design dual output mode**
+Every command MUST support both human-readable and machine-readable output:
+```typescript
+// Human mode (default): tables, colors, formatted text
+function formatHuman(data: any, format: 'table' | 'list' | 'detail'): string {
+  if (format === 'table') return formatTable(data, { borders: true, colors: true });
+  if (format === 'list') return data.map((d: any) => `  • ${d.name}`).join('\n');
+  return JSON.stringify(data, null, 2);
+}
+
+// JSON mode (--json flag): structured output for piping/scripting
+function formatJSON(data: any): string {
+  return JSON.stringify(data, null, 2);
+}
+
+// Error output follows same dual pattern
+function formatError(error: Error, jsonMode: boolean): string {
+  if (jsonMode) return JSON.stringify({ error: error.message, type: error.constructor.name });
+  return chalk.red(`Error: ${error.message}`);
+}
+```
+
+**Step 3 — Implement session with undo/redo**
+For mutating operations, maintain session state:
+```typescript
+interface CLISession {
+  id: string;
+  history: SessionSnapshot[];
+  undoStack: SessionSnapshot[];   // max 50
+  redoStack: SessionSnapshot[];
+  modified: boolean;
+}
+
+function snapshot(session: CLISession, action: string): CLISession {
+  return {
+    ...session,
+    undoStack: [...session.undoStack.slice(-49), { action, state: deepCopy(session) }],
+    redoStack: [],  // new action clears redo
+    modified: true,
+  };
+}
+```
+
+**Step 4 — Build REPL mode**
+CLI enters REPL when invoked without subcommand:
+```typescript
+// Click (Python) — invoke_without_command=True enters REPL
+@click.group(invoke_without_command=True)
+@click.pass_context
+def cli(ctx):
+    if ctx.invoked_subcommand is None:
+        start_repl(ctx)
+
+// Commander (Node.js) — detect no args
+if (process.argv.length <= 2) {
+  startREPL({ history: '~/.myapp_history', prompt: 'myapp> ' });
+}
+```
+
+REPL features: command history (file-persisted), auto-suggest from history, tab completion, colored prompt, help command, status bar showing connection state.
+
+**Step 5 — Package for distribution**
+```bash
+# Python: PEP 420 namespace packages for independent installability
+# pyproject.toml or setup.py
+entry_points = {
+    'console_scripts': ['myapp = myapp.cli:main'],
+}
+
+# Node.js: bin field in package.json
+{
+  "bin": { "myapp": "./bin/cli.js" },
+  "files": ["bin/", "lib/"]
+}
+```
+
+**Step 6 — Verify installation**
+After packaging: install locally (`pip install -e .` or `npm link`), verify binary on PATH (`which myapp`), run `myapp --version`, test `myapp --json` mode, and verify REPL launch.
+
+#### Example
+
+```python
+# Generated CLI structure for a backend service
+# myapp/
+# ├── cli.py          ← Click entry point + REPL
+# ├── commands/
+# │   ├── users.py    ← User CRUD commands
+# │   ├── orders.py   ← Order management
+# │   └── config.py   ← Config operations
+# ├── core/
+# │   ├── session.py  ← Session + undo/redo
+# │   └── client.py   ← API client wrapper
+# └── utils/
+#     ├── output.py   ← Dual output (human + JSON)
+#     └── repl.py     ← REPL with prompt-toolkit
+
+# Usage:
+# myapp users list                    → human-readable table
+# myapp users list --json             → JSON output for piping
+# myapp users create --name "Alice"   → creates user, snapshots for undo
+# myapp                               → enters REPL mode
+```
+
+---
+
+### async-pipeline
+
+Multi-stage async processing pipelines with waterfall engine selection, progress streaming, and credit-based billing. Patterns for building services that process data through multiple fallback strategies with real-time status updates.
+
+#### Workflow
+
+**Step 1 — Design engine waterfall**
+Multiple processing engines ranked by quality and cost:
+```typescript
+interface ProcessingEngine {
+  name: string;
+  quality: number;       // higher = preferred
+  costMultiplier: number; // credit cost factor
+  execute: (input: Input) => Promise<Result>;
+  canHandle: (input: Input) => boolean;
+}
+
+// Engines race with staggered delays — first valid result wins
+async function waterfallExecute(
+  engines: ProcessingEngine[],
+  input: Input,
+  staggerDelayMs: number = 500
+): Promise<{ result: Result; engine: string }> {
+  const sorted = engines
+    .filter(e => e.canHandle(input))
+    .sort((a, b) => b.quality - a.quality);
+
+  const controller = new AbortController();
+
+  const races = sorted.map((engine, i) =>
+    new Promise<{ result: Result; engine: string }>(async (resolve, reject) => {
+      // Stagger start: engine 0 starts immediately, engine 1 after 500ms, etc.
+      if (i > 0) await delay(i * staggerDelayMs);
+      if (controller.signal.aborted) return reject(new Error('aborted'));
+
+      try {
+        const result = await engine.execute(input);
+        if (isValid(result)) {
+          controller.abort();  // cancel slower engines
+          resolve({ result, engine: engine.name });
+        } else {
+          reject(new Error(`${engine.name}: invalid result`));
+        }
+      } catch (err) {
+        reject(err);
+      }
+    })
+  );
+
+  return Promise.any(races);
+}
+```
+
+**Step 2 — Implement transform pipeline**
+Chain transforms that process data sequentially:
+```typescript
+type Transformer<T> = (data: T, context: PipelineContext) => Promise<T>;
+
+async function runPipeline<T>(
+  data: T,
+  transformers: Transformer<T>[],
+  onProgress: (stage: string, pct: number) => void
+): Promise<T> {
+  let current = data;
+  for (let i = 0; i < transformers.length; i++) {
+    onProgress(transformers[i].name, (i / transformers.length) * 100);
+    current = await transformers[i](current, context);
+  }
+  onProgress('complete', 100);
+  return current;
+}
+```
+
+**Step 3 — Stream progress via SSE**
+Real-time progress from worker to client:
+```typescript
+// Worker side: publish progress to Redis pub/sub
+async function publishProgress(jobId: string, stage: string, pct: number) {
+  await redis.publish(`job:${jobId}:progress`, JSON.stringify({ stage, pct, ts: Date.now() }));
+}
+
+// API side: SSE endpoint
+app.get('/jobs/:id/progress', async (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
+  const subscriber = redis.duplicate();
+  await subscriber.subscribe(`job:${req.params.id}:progress`);
+
+  subscriber.on('message', (_channel, message) => {
+    res.write(`data: ${message}\n\n`);
+  });
+
+  req.on('close', () => subscriber.unsubscribe());
+});
+```
+
+**Step 4 — Two-tier concurrency control**
+```typescript
+// Team-level: limit concurrent jobs per team
+async function canEnqueue(teamId: string): Promise<boolean> {
+  const active = await redis.zcard(`team:${teamId}:active`);
+  const limit = await getTeamConcurrencyLimit(teamId);
+  return active < limit;
+}
+
+// Job-level: track active jobs with TTL (auto-cleanup on crash)
+async function markActive(teamId: string, jobId: string) {
+  await redis.zadd(`team:${teamId}:active`, Date.now(), jobId);
+  await redis.expire(`team:${teamId}:active`, 3600);  // 1h TTL safety net
+}
+
+async function markComplete(teamId: string, jobId: string) {
+  await redis.zrem(`team:${teamId}:active`, jobId);
+}
+```
+
+**Step 5 — Dynamic credit billing**
+```typescript
+interface CreditCost {
+  base: number;
+  engineMultiplier: number;   // stealth proxy = 4x
+  formatMultiplier: number;   // JSON extraction = 5x
+  extras: number;             // per-page for PDFs, per-territory for pricing
+}
+
+function calculateCredits(job: CompletedJob): number {
+  let cost = job.cost.base;
+  cost *= job.cost.engineMultiplier;
+  cost *= job.cost.formatMultiplier;
+  cost += job.cost.extras;
+  return Math.ceil(cost);
+}
+```
+
+**Step 6 — Dead letter queue with retry classification**
+```typescript
+interface FailedJob {
+  id: string;
+  error: string;
+  errorCode: 'TRANSIENT' | 'PERMANENT' | 'TIMEOUT' | 'RATE_LIMITED';
+  attempts: number;
+  stageTiming: Record<string, number>;  // per-stage perf data
+}
+
+// Retry only transient failures; permanent goes to dead letter
+function shouldRetry(job: FailedJob): boolean {
+  if (job.errorCode === 'PERMANENT') return false;
+  if (job.attempts >= 3) return false;
+  return true;
+}
+```
+
+#### Example
+
+```typescript
+// Complete async pipeline for document processing
+const docPipeline = createPipeline({
+  engines: [
+    { name: 'native-parser', quality: 100, costMultiplier: 1, execute: nativeParse },
+    { name: 'llm-extraction', quality: 80, costMultiplier: 5, execute: llmExtract },
+    { name: 'ocr-fallback', quality: 50, costMultiplier: 3, execute: ocrExtract },
+  ],
+  transforms: [
+    cleanHTML,
+    extractMetadata,
+    convertToMarkdown,
+    generateSummary,
+    indexForSearch,
+  ],
+  concurrency: { perTeam: 10, perJob: 3 },
+  billing: { base: 1, jsonFormat: 5 },
+  deadLetter: { maxRetries: 3, alertThreshold: 10 },
+});
+
+// Enqueue
+const jobId = await docPipeline.enqueue(teamId, { url, format: 'json' });
+
+// Stream progress
+const progress = docPipeline.streamProgress(jobId);
+for await (const update of progress) {
+  console.log(`${update.stage}: ${update.pct}%`);
+}
+```
+
+---
+
 ## Connections
 
 ```
@@ -625,6 +943,10 @@ Called By ← audit (L2): backend health dimension
 Called By ← deploy (L2): pre-deploy readiness checks (health endpoints, graceful shutdown)
 Called By ← @rune/saas (L4): SaaS services use backend API, auth, and caching patterns
 Called By ← @rune/security (L4): security audits reference auth flows and middleware patterns
+Called By ← @rune/mobile (L4): mobile backend integration patterns (auth, push server)
+Inter-skill: cli-generation → api-patterns (CLI wraps existing API surface)
+Inter-skill: async-pipeline → background-jobs (pipeline stages use job queue for execution)
+Inter-skill: async-pipeline → caching-patterns (pipeline results cached by content hash)
 ```
 
 ## Tech Stack Support
@@ -664,6 +986,11 @@ Called By ← @rune/security (L4): security audits reference auth flows and midd
 | Dead letter queue ignored — failed jobs accumulate silently for weeks | MEDIUM | Emit alert on dead letter queue depth > 0 for critical queues; add to health dashboard |
 | Graceful shutdown timeout too short — in-flight requests killed mid-operation | LOW | Default 30s timeout; increase to 60s for jobs with long processing time (PDF, video) |
 | Rate limiting suggested but Redis/store not available in project | LOW | Check for existing Redis/memory store; suggest in-memory rate limiter as fallback |
+| Waterfall engine race: AbortController doesn't cancel in-flight HTTP requests | MEDIUM | Use engine-specific abort signals; verify cancellation in each engine's execute() |
+| SSE connection drops on proxy/load balancer timeout (60s default) | MEDIUM | Send heartbeat comment every 30s (`:\n\n`); client reconnects with `Last-Event-ID` |
+| CLI REPL history file grows unbounded | LOW | Cap history at 1000 entries; rotate on startup |
+| Dual output mode: `--json` flag not propagated to subcommands | MEDIUM | Set json mode in CLI context object, read from context in all formatters |
+| Credit calculation floating-point drift | LOW | Always `Math.ceil()` final cost; use integer cents internally |
 
 ## Done When
 
@@ -674,8 +1001,10 @@ Called By ← @rune/security (L4): security audits reference auth flows and midd
 - Caching strategy implemented: cacheable endpoints identified, cache layer selected, invalidation logic emitted alongside every write
 - Async operations moved to background jobs: idempotency keys assigned, retry strategy configured, dead letter queue wired
 - All emitted code uses project's existing framework and ORM (detected from package.json)
+- CLI generated with dual output (human + JSON), REPL mode, session undo/redo, and installable package
+- Async pipeline has waterfall engine selection, progress streaming via SSE, concurrency control, and credit billing
 - Structured report emitted for each skill invoked
 
 ## Cost Profile
 
-~10,000–20,000 tokens per full pack run (all 6 skills). Individual skill: ~2,000–4,000 tokens. Sonnet default for code generation and security audit. Use haiku for detection scans (Step 1 of each skill). Escalate to opus for architecture decisions on caching topology or queue system selection in high-traffic systems.
+~14,000–28,000 tokens per full pack run (all 8 skills). Individual skill: ~2,000–5,000 tokens. Sonnet default for code generation and security audit. Use haiku for detection scans (Step 1 of each skill). Escalate to opus for architecture decisions on caching topology, pipeline design, or queue system selection in high-traffic systems.

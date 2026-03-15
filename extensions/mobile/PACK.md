@@ -1,9 +1,9 @@
 ---
 name: "@rune/mobile"
-description: Mobile development patterns — React Native, Flutter, deep linking, push notifications, OTA updates, app store preparation, and native bridge integration.
+description: Mobile development patterns — React Native, Flutter, deep linking, push notifications, OTA updates, app store preparation, native bridge integration, iOS build pipeline, and App Store Connect automation.
 metadata:
   author: runedev
-  version: "0.2.0"
+  version: "0.3.0"
   layer: L4
   price: "$15"
   target: Mobile developers
@@ -25,6 +25,8 @@ Mobile development has platform-specific pitfalls that web developers hit repeat
 - `/rune ota-updates` — set up or audit OTA update strategy
 - `/rune app-store-prep` — prepare app store submission
 - `/rune native-bridge` — audit or create native module bridges
+- `/rune ios-build` — end-to-end iOS build, sign, archive, upload pipeline
+- `/rune app-store-connect` — App Store Connect API operations (versions, screenshots, localization, IAPs)
 - Called by `cook` (L1) when mobile task detected
 - Called by `team` (L1) when porting web to mobile
 
@@ -586,6 +588,290 @@ public class HapticsModule: Module {
 
 ---
 
+### ios-build-pipeline
+
+End-to-end iOS build pipeline — certificate generation, provisioning profiles, Xcode archive, IPA export, TestFlight upload, build polling. Covers both React Native and native Swift projects.
+
+#### Workflow
+
+**Step 1 — Detect project type and signing state**
+Use Glob to find: `.xcworkspace` or `.xcodeproj` (check `ios/`, `macos/`, `apple/` for RN projects), `Podfile` (needs `pod install` if workspace missing), `project.pbxproj` for current signing config (`DEVELOPMENT_TEAM`, `CODE_SIGN_STYLE`, `PRODUCT_BUNDLE_IDENTIFIER`). Check for existing signing state file (`.rune/signing-state.json`) from previous pipeline runs — if exists, skip completed steps (idempotent pipeline).
+
+**Step 2 — Bundle ID registration**
+Check if bundle ID exists on Apple Developer portal. If not:
+- Register via App Store Connect API: `POST /v1/bundleIds` with `identifier`, `name`, `platform: IOS`
+- Common failure: bundle ID already taken by another team → suggest alternative namespace
+- Store `bundleIdResourceId` in signing state for later use
+
+**Step 3 — Distribution certificate**
+Generate Apple Distribution certificate:
+```bash
+# Generate RSA 2048-bit CSR via OpenSSL
+openssl req -new -newkey rsa:2048 -nodes \
+  -keyout distribution.key \
+  -out distribution.csr \
+  -subj "/CN=Apple Distribution/O=YourTeam"
+
+# Upload CSR to App Store Connect API
+# Download signed certificate (.cer)
+
+# Create .p12 bundle — OpenSSL 3.x requires -legacy flag
+openssl pkcs12 -export -legacy \
+  -inkey distribution.key \
+  -in distribution.cer \
+  -out distribution.p12 \
+  -passout pass:""
+
+# Import to login keychain
+security import distribution.p12 -k ~/Library/Keychains/login.keychain-db -T /usr/bin/codesign
+```
+
+Sharp edges:
+- OpenSSL 3.x (macOS 14+) changed default encryption — `.p12` without `-legacy` flag silently fails import
+- Must import to `login.keychain-db` specifically, not `System.keychain`
+- `codesign` needs explicit trust via `-T /usr/bin/codesign` flag
+
+**Step 4 — Provisioning profile**
+Create App Store distribution profile via ASC API → download → install:
+```bash
+# Decode base64 profile content from API response
+base64 -d profile_content.b64 > profile.mobileprovision
+
+# Install to standard location
+cp profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/<UUID>.mobileprovision
+```
+
+**Step 5 — Patch project.pbxproj**
+Update Xcode project build settings:
+- `DEVELOPMENT_TEAM` = team ID from ASC
+- `CODE_SIGN_STYLE` = `Automatic` for dev, `Manual` for distribution
+- `PRODUCT_BUNDLE_IDENTIFIER` = registered bundle ID
+- For React Native: detect workspace in `ios/`, run `pod install` if Podfile exists without workspace
+
+**Step 6 — Archive and export**
+```bash
+# Archive
+xcodebuild archive \
+  -workspace App.xcworkspace \
+  -scheme App \
+  -archivePath build/App.xcarchive \
+  -destination "generic/platform=iOS" \
+  CODE_SIGN_STYLE=Manual \
+  CODE_SIGN_IDENTITY="Apple Distribution" \
+  PROVISIONING_PROFILE_SPECIFIER="<profile-name>"
+
+# Export IPA
+xcodebuild -exportArchive \
+  -archivePath build/App.xcarchive \
+  -exportPath build/export \
+  -exportOptionsPlist ExportOptions.plist
+```
+
+Sharp edges:
+- Archive fails silently if CocoaPods not installed → check for `Pods/` directory
+- Export failure diagnostics hidden in `IDEDistribution.standard-log.txt` inside archive — always check this file on failure
+- `ExportOptions.plist` must specify `method: app-store`, `teamID`, `signingStyle: manual`, `provisioningProfiles` dict
+
+**Step 7 — Upload to TestFlight**
+```bash
+# Upload via xcrun altool with API key auth (.p8 file)
+xcrun altool --upload-app \
+  -f build/export/App.ipa \
+  --type ios \
+  --apiKey <key-id> \
+  --apiIssuer <issuer-id>
+```
+
+**Step 8 — Poll build processing**
+After upload, poll ASC API every 30s (up to 30 min) for build to transition from `PROCESSING` → `VALID` or `INVALID`. On `VALID`: auto-attach build to pending App Store version. On `INVALID`: fetch `betaBuildLocalizations` for error details.
+
+#### Example
+
+```json
+// .rune/signing-state.json — idempotent pipeline state
+{
+  "bundleId": "com.example.myapp",
+  "bundleIdResourceId": "ABC123",
+  "certificateId": "DEF456",
+  "provisioningProfileUUID": "GHI-789-...",
+  "provisioningProfileName": "MyApp Distribution",
+  "teamId": "TEAM123",
+  "lastArchivePath": "build/App.xcarchive",
+  "lastUploadBuildNumber": "42",
+  "completedSteps": ["bundleId", "certificate", "profile", "patch"]
+}
+```
+
+```xml
+<!-- ExportOptions.plist -->
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>method</key>
+  <string>app-store</string>
+  <key>teamID</key>
+  <string>TEAM123</string>
+  <key>signingStyle</key>
+  <string>manual</string>
+  <key>provisioningProfiles</key>
+  <dict>
+    <key>com.example.myapp</key>
+    <string>MyApp Distribution</string>
+  </dict>
+</dict>
+</plist>
+```
+
+---
+
+### app-store-connect
+
+App Store Connect API automation — version management, localized store listings, screenshot upload, IAP/subscription creation, review submission, customer review monitoring.
+
+#### Workflow
+
+**Step 1 — Authenticate with ASC API**
+App Store Connect uses JWT (ES256) with 20-minute expiry:
+```typescript
+import jwt from 'jsonwebtoken';
+import fs from 'fs';
+
+function generateASCToken(keyId: string, issuerId: string, privateKeyPath: string): string {
+  const privateKey = fs.readFileSync(privateKeyPath, 'utf8');
+  return jwt.sign({}, privateKey, {
+    algorithm: 'ES256',
+    expiresIn: '20m',
+    issuer: issuerId,
+    header: {
+      alg: 'ES256',
+      kid: keyId,
+      typ: 'JWT',
+    },
+    audience: 'appstoreconnect-v1',
+  });
+}
+```
+Sharp edge: Token expires in 20 min — must auto-refresh when within 60s of expiry. Rate limit: 200 requests/minute, 429 response requires exponential backoff.
+
+**Step 2 — Version management**
+Create new App Store version:
+```
+POST /v1/appStoreVersions
+{
+  "data": {
+    "type": "appStoreVersions",
+    "attributes": {
+      "platform": "IOS",
+      "versionString": "1.2.0"
+    },
+    "relationships": {
+      "app": { "data": { "type": "apps", "id": "<app-id>" } }
+    }
+  }
+}
+```
+- Only ONE editable version allowed per platform at a time
+- Cannot create version if existing version is "Pending Developer Release"
+- Version string must be higher than current live version (semver)
+
+**Step 3 — Localized store listing**
+For each locale (`en-US`, `ja`, `de-DE`, etc.):
+- `description` (4000 chars max)
+- `keywords` (100 chars max, comma-separated)
+- `whatsNew` (4000 chars, release notes)
+- `promotionalText` (170 chars, can be updated without new version)
+
+**Step 4 — Screenshot upload (chunked reservation)**
+ASC uses a 3-step upload process:
+1. Reserve upload: `POST /v1/appScreenshots` with `fileName`, `fileSize` → get `uploadOperations` array
+2. Upload chunks: PUT each chunk to the returned URLs with correct `Content-Length` and offset headers
+3. Commit: `PATCH /v1/appScreenshots/{id}` with `uploaded: true` and SHA-256 `sourceFileChecksum`
+
+Sharp edges:
+- Chunk size dictated by API response, NOT configurable client-side
+- Must send ALL chunks before commit or upload silently fails
+- Screenshot dimensions must EXACTLY match device class (e.g., 1320×2868 for 6.9")
+- Maximum 10 screenshots per locale per device class
+
+**Step 5 — In-App Purchase & subscription management**
+Create IAP:
+```
+POST /v1/inAppPurchases
+{ "type": "inAppPurchases", "attributes": { "name": "Pro Upgrade", "productId": "com.example.pro", "inAppPurchaseType": "NON_CONSUMABLE" } }
+```
+For subscriptions: create subscription group first, then subscription within group, then set pricing per territory. Territory pricing requires concurrent requests with retry — ASC rate limits per-territory pricing endpoints aggressively.
+
+**Step 6 — Submission readiness check**
+Before submitting for review, verify completeness:
+- [ ] App Store version exists with build attached
+- [ ] All required locales have description, keywords, screenshots
+- [ ] Screenshots uploaded for ALL required device classes (6.9", 6.7", 6.5")
+- [ ] Age rating questionnaire completed
+- [ ] App review contact info set (first name, last name, phone, email)
+- [ ] Privacy policy URL set
+- [ ] Export compliance answered
+- [ ] Content rights declaration completed (if app has third-party content)
+
+**Step 7 — Submit and monitor**
+```
+POST /v1/appStoreVersionSubmissions
+{ "data": { "relationships": { "appStoreVersion": { "data": { "type": "appStoreVersions", "id": "<version-id>" } } } } }
+```
+Poll `GET /v1/appStoreVersions/{id}` for `appStoreState` transitions: `WAITING_FOR_REVIEW` → `IN_REVIEW` → `READY_FOR_SALE` (or `REJECTED`). On rejection: fetch `appStoreVersionSubmissions` for reviewer notes.
+
+#### Example
+
+```typescript
+// Complete ASC API client pattern
+interface ASCClient {
+  // Auth
+  refreshToken(): string;
+
+  // Apps
+  listApps(): Promise<ASCApp[]>;
+  getApp(id: string): Promise<ASCApp>;
+
+  // Versions
+  createVersion(appId: string, version: string): Promise<ASCVersion>;
+  attachBuild(versionId: string, buildId: string): Promise<void>;
+
+  // Localization
+  updateLocalization(versionId: string, locale: string, data: LocalizationData): Promise<void>;
+
+  // Screenshots (3-step)
+  reserveScreenshot(setId: string, fileName: string, fileSize: number): Promise<UploadOps>;
+  uploadChunks(ops: UploadOps, fileBuffer: Buffer): Promise<void>;
+  commitScreenshot(screenshotId: string, checksum: string): Promise<void>;
+
+  // IAP
+  createIAP(appId: string, name: string, productId: string, type: IAPType): Promise<ASCIAP>;
+
+  // Submission
+  checkReadiness(versionId: string): Promise<ReadinessReport>;
+  submitForReview(versionId: string): Promise<void>;
+  pollReviewStatus(versionId: string, intervalMs?: number): AsyncGenerator<ReviewStatus>;
+
+  // Reviews
+  listCustomerReviews(appId: string): Promise<CustomerReview[]>;
+  respondToReview(reviewId: string, body: string): Promise<void>;
+}
+
+// Pagination helper — ASC uses cursor-based pagination via `next` links
+async function* paginate<T>(client: ASCClient, url: string): AsyncGenerator<T> {
+  let nextUrl: string | null = url;
+  while (nextUrl) {
+    const response = await client.request(nextUrl);
+    for (const item of response.data) {
+      yield item as T;
+    }
+    nextUrl = response.links?.next ?? null;
+  }
+}
+```
+
+---
+
 ## Connections
 
 ```
@@ -594,10 +880,15 @@ Calls → asset-creator (L3): generate app icons and splash screens
 Calls → sentinel (L2): audit push notification security, deep link validation
 Calls → verification (L3): run mobile-specific checks (build, lint, type-check)
 Calls → @rune/ui (L4): design system tokens, palette, typography for mobile UI consistency
+Calls → @rune/backend (L4): API patterns for mobile backend integration (auth, push server)
+Calls → @rune/security (L4): code signing audit, API key management, certificate validation
 Called By ← cook (L1): when mobile task detected
 Called By ← team (L1): when porting web to mobile
 Called By ← launch (L1): app store submission flow
 Called By ← deploy (L2): mobile-specific deployment (EAS Build, Fastlane)
+Inter-skill: ios-build-pipeline → app-store-prep (pipeline feeds into submission checklist)
+Inter-skill: app-store-connect → app-store-prep (API automation completes manual checklist items)
+Inter-skill: ios-build-pipeline → app-store-connect (upload build → attach to version → submit)
 ```
 
 ## Tech Stack Support
@@ -607,6 +898,7 @@ Called By ← deploy (L2): mobile-specific deployment (EAS Build, Fastlane)
 | React Native (bare) | Zustand / Redux | React Navigation v7 | Metro + Gradle/Xcode | CodePush |
 | Expo (managed) | Zustand | Expo Router v4 | EAS Build | EAS Update |
 | Flutter | Riverpod / BLoC | GoRouter | Flutter CLI | Shorebird |
+| Native iOS (Swift) | SwiftUI @Observable | NavigationStack | xcodebuild | — |
 
 ## Constraints
 
@@ -637,6 +929,12 @@ Called By ← deploy (L2): mobile-specific deployment (EAS Build, Fastlane)
 | FlatList `removeClippedSubviews` causes blank cells on fast scroll | MEDIUM | Test with 1000+ items; prefer FlashList with accurate `estimatedItemSize` |
 | iOS 18 requires explicit permission before scheduling local notifications | MEDIUM | Always call `requestPermissionsAsync()` before any `scheduleNotificationAsync()` |
 | EAS Build queue: free tier 30-60 min wait during peak hours | LOW | Use `--local` flag for faster iteration; upgrade to priority queue for production |
+| OpenSSL 3.x `.p12` export silently fails without `-legacy` flag (macOS 14+) | CRITICAL | Always use `openssl pkcs12 -export -legacy` for certificate bundles |
+| `xcodebuild` export failure diagnostics hidden in archive log | HIGH | On export failure, read `IDEDistribution.standard-log.txt` inside `.xcarchive` |
+| ASC API rate limit: 200 req/min, 429 with no Retry-After header | HIGH | Implement exponential backoff; batch territory pricing operations |
+| ASC JWT expires in 20 min — stale token returns 401 with misleading error | MEDIUM | Auto-refresh token when within 60s of expiry |
+| Screenshot upload: chunks must ALL complete before commit or upload silently corrupts | HIGH | Verify all chunk PUT responses before PATCH commit |
+| TestFlight build processing takes 5-30 min — no webhook, must poll | MEDIUM | Poll every 30s with 30-min timeout; store build number for resume |
 
 ## Done When
 
@@ -647,8 +945,10 @@ Called By ← deploy (L2): mobile-specific deployment (EAS Build, Fastlane)
 - FlatList/FlashList optimized with memoization, key extraction, and window sizing
 - App store metadata generated with correct dimensions, privacy manifest, and platform-specific requirements
 - Native bridges typed and error-handled for both platforms using modern APIs (Expo Modules or TurboModules)
+- iOS build pipeline producing signed IPA with idempotent signing state
+- App Store Connect operations automated — version, localization, screenshots, IAP, submission
 - Structured report emitted for each skill invoked
 
 ## Cost Profile
 
-~12,000–24,000 tokens per full pack run (all 7 skills). Individual skill: ~2,000–4,000 tokens. Sonnet default. Use haiku for config detection; escalate to sonnet for code generation and platform-specific patterns.
+~16,000–32,000 tokens per full pack run (all 9 skills). Individual skill: ~2,000–5,000 tokens. Sonnet default. Use haiku for config detection; escalate to sonnet for code generation, build pipeline, and ASC API patterns.

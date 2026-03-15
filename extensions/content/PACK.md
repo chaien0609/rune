@@ -1,9 +1,9 @@
 ---
 name: "@rune/content"
-description: Content platform patterns — blog systems, CMS integration, MDX authoring, internationalization, and SEO.
+description: Content platform patterns — blog systems, CMS integration, MDX authoring, internationalization, SEO, video repurposing pipelines, and content scoring.
 metadata:
   author: runedev
-  version: "0.2.0"
+  version: "0.3.0"
   layer: L4
   price: "$9"
   target: Content creators
@@ -23,6 +23,8 @@ Content-driven sites break in ways that don't show up until production: blog pag
 - `/rune mdx-authoring` — configure MDX pipeline with custom components
 - `/rune i18n` — implement or audit internationalization
 - `/rune seo-patterns` — audit SEO, structured data, and meta tags
+- `/rune video-repurpose` — build long-to-short video repurposing pipeline
+- `/rune content-scoring` — implement engagement/virality scoring for content
 - Called by `cook` (L1) when content project detected
 - Called by `marketing` (L2) when creating blog content
 
@@ -35,6 +37,8 @@ Content-driven sites break in ways that don't show up until production: blog pag
 | mdx-authoring | L4 | sonnet | Custom components, TOC, syntax highlighting |
 | i18n | L4 | sonnet | Locale routing, translations, hreflang, RTL |
 | seo-patterns | L4 | sonnet | JSON-LD, sitemap, meta tags, Core Web Vitals |
+| video-repurpose | L4 | sonnet | Long→short video pipeline, captions, face-crop |
+| content-scoring | L4 | sonnet | Virality scoring, engagement metrics, hook analysis |
 
 ## Workflows
 
@@ -1497,6 +1501,256 @@ Called By ← marketing (L2): when creating blog content
 | `@rune/saas` | Auth-gated content (members-only posts), subscription paywalls | Premium content model |
 | `@rune/ecommerce` | Product-linked blog posts, shoppable content, affiliate links | Commerce + content hybrid sites |
 
+### video-repurpose
+
+Long-form video → short-form clip pipeline. Transcribe, identify viral segments, reformat to vertical (9:16), add animated captions, insert B-roll. Covers the full pipeline from YouTube URL or file upload to platform-ready export.
+
+#### Workflow
+
+**Step 1 — Ingest source video**
+Two paths:
+- URL: Use `yt-dlp` to download (with exponential backoff, browser-mimicking headers for anti-bot):
+  ```bash
+  yt-dlp -f "bestvideo[height<=1080]+bestaudio/best[height<=1080]" \
+    --merge-output-format mp4 \
+    --retry-sleep 5 --retries 3 \
+    -o "source_%(id)s.%(ext)s" "<url>"
+  ```
+- File upload: Validate format (mp4/mov/webm), check duration (warn if > 2 hours — processing time scales non-linearly)
+
+Cache key: `sha256(source_type|processing_mode|url_or_hash)` — avoid reprocessing same video.
+
+**Step 2 — Transcribe with word-level timestamps**
+Use AssemblyAI (97%+ accuracy, 20+ languages) or Whisper (self-hosted):
+```typescript
+interface WordTimestamp {
+  text: string;
+  start: number;  // milliseconds
+  end: number;
+  confidence: number;
+}
+
+interface Transcript {
+  words: WordTimestamp[];
+  text: string;
+  language: string;
+  duration: number;
+}
+```
+Sharp edge: Whisper `large-v3` halluccinates on silence — preprocess with silence detection and split audio at gaps > 2s.
+
+**Step 3 — Identify viral segments via LLM**
+Send transcript to LLM with structured output schema:
+```typescript
+interface ViralSegment {
+  startMs: number;
+  endMs: number;
+  hookType: 'question' | 'statement' | 'statistic' | 'story' | 'contrast';
+  title: string;
+  score: ViralityScore;
+  bRollOpportunities: Array<{ timestampMs: number; query: string }>;
+}
+
+interface ViralityScore {
+  hookStrength: number;   // 0-25: first 3 seconds grab attention?
+  engagement: number;     // 0-25: keeps viewer watching?
+  value: number;          // 0-25: teaches or entertains?
+  shareability: number;   // 0-25: would viewer share this?
+  total: number;          // 0-100
+}
+```
+
+Filters:
+- Discard segments < 5 seconds or < 3 words
+- Recalculate total if subscores don't add up (LLM math errors)
+- Sort by total score, return top 3-7 segments per video
+
+**Step 4 — Reformat to vertical (9:16) with face-centered crop**
+Triple-fallback face detection for crop anchor:
+1. **MediaPipe** (fastest, most accurate for single face)
+2. **OpenCV DNN** (good for multiple faces)
+3. **Haar cascade** (last resort, highest false positive rate)
+
+Temporal consistency: filter out detection jumps > 20% frame width between consecutive frames (false positives). Smooth crop position with rolling average (5 frames) to avoid jitter.
+
+Fast path: if clip needs no captions or crop changes, use ffmpeg stream copy (no re-encoding) for 10x speed.
+
+**Step 5 — Add animated captions**
+Word-synchronized captions from transcript timestamps. Template system:
+| Template | Style | Use Case |
+|----------|-------|----------|
+| `bold-highlight` | Active word in accent color, bold | Educational content |
+| `karaoke` | Word-by-word reveal, green highlight | Motivational, podcast |
+| `subtitle` | Bottom-center, semi-transparent bg | Professional, interview |
+| `pop` | Scale animation on each word | Energetic, entertainment |
+
+Caption rendering: pre-render text as image overlays (MoviePy TextClip or Pillow), composite onto video at word timestamps.
+
+**Step 6 — Insert B-roll (optional)**
+Search stock footage API (Pexels) for AI-identified insertion points:
+```typescript
+async function findBRoll(query: string, orientation: 'portrait' | 'landscape'): Promise<StockClip> {
+  const results = await pexels.videos.search({ query, orientation, per_page: 5 });
+  // Score by: duration match, HD quality, relevance
+  return results.videos
+    .map(v => ({ ...v, score: scoreBRoll(v, targetDuration) }))
+    .sort((a, b) => b.score - a.score)[0];
+}
+```
+Composite with crossfade transition (0.5s) at identified timestamps.
+
+**Step 7 — Export with platform presets**
+| Platform | Aspect | Max Duration | Resolution | Codec |
+|----------|--------|-------------|------------|-------|
+| TikTok | 9:16 | 10 min | 1080×1920 | H.264 |
+| Instagram Reels | 9:16 | 90s | 1080×1920 | H.264 |
+| YouTube Shorts | 9:16 | 60s | 1080×1920 | H.264 |
+| Twitter/X | 16:9 or 1:1 | 2m20s | 1280×720 | H.264 |
+
+#### Example
+
+```typescript
+// Complete pipeline orchestration
+async function repurposeVideo(sourceUrl: string, options: RepurposeOptions): Promise<Clip[]> {
+  // Step 1: Ingest
+  const cacheKey = sha256(`url|${options.mode}|${sourceUrl}`);
+  const cached = await cache.get(cacheKey);
+  if (cached) return cached;
+
+  const sourcePath = await downloadVideo(sourceUrl);
+
+  // Step 2: Transcribe
+  const transcript = await transcribe(sourcePath, { model: options.mode === 'fast' ? 'nano' : 'default' });
+
+  // Step 3: Identify segments
+  const segments = await identifyViralSegments(transcript, {
+    minDuration: 10_000,
+    maxDuration: 60_000,
+    maxSegments: 7,
+  });
+
+  // Step 4-6: Process each segment in parallel
+  const clips = await Promise.all(
+    segments.map(async (segment) => {
+      const raw = await extractSegment(sourcePath, segment.startMs, segment.endMs);
+      const vertical = await cropToVertical(raw, { faceDetection: true });
+      const captioned = await addCaptions(vertical, transcript.words, segment, options.captionTemplate);
+      const withBRoll = options.bRoll
+        ? await insertBRoll(captioned, segment.bRollOpportunities)
+        : captioned;
+      return { ...segment, outputPath: withBRoll };
+    })
+  );
+
+  await cache.set(cacheKey, clips);
+  return clips;
+}
+```
+
+---
+
+### content-scoring
+
+Engagement and virality scoring for content pieces. Analyze hooks, readability, shareability, and platform fit. Works for both video clips and written articles.
+
+#### Workflow
+
+**Step 1 — Detect content type**
+Determine if scoring target is:
+- **Video clip** (from video-repurpose pipeline or standalone)
+- **Blog post / article** (markdown, MDX, or CMS content)
+- **Social post** (short-form text, tweet, thread)
+
+**Step 2 — Score across 4 dimensions**
+```typescript
+interface ContentScore {
+  hook: {
+    score: number;        // 0-25
+    type: 'question' | 'statistic' | 'story' | 'contrast' | 'bold-claim' | 'how-to';
+    assessment: string;   // Why this hook works or doesn't
+  };
+  engagement: {
+    score: number;        // 0-25
+    readability: number;  // Flesch-Kincaid grade level
+    pacing: string;       // 'too-slow' | 'good' | 'too-fast'
+    callToAction: boolean;
+  };
+  value: {
+    score: number;        // 0-25
+    teaches: boolean;
+    entertains: boolean;
+    uniqueInsight: boolean;
+  };
+  shareability: {
+    score: number;        // 0-25
+    emotionalTrigger: string | null;  // 'surprise' | 'anger' | 'joy' | 'fear'
+    quotable: string[];   // Extract quotable one-liners
+    platformFit: Record<Platform, number>;  // 0-10 per platform
+  };
+  total: number;          // 0-100
+  tier: 'viral' | 'strong' | 'average' | 'weak';  // >80 viral, >60 strong, >40 average
+}
+```
+
+**Step 3 — Platform-specific optimization hints**
+Each platform has different engagement patterns:
+| Platform | Hook Window | Optimal Length | Key Factor |
+|----------|-------------|---------------|------------|
+| TikTok | 0-1s | 15-30s | Pattern interrupt, trend audio |
+| YouTube | 0-3s | 8-12 min (long), 30-60s (Shorts) | Curiosity gap, retention graph |
+| Twitter/X | First line | 280 chars or 4-tweet thread | Hot take, data point |
+| LinkedIn | First 2 lines | 150-300 words | Professional insight, personal story |
+| Blog | Title + first paragraph | 1500-2500 words | SEO keyword + value promise |
+
+**Step 4 — Emit improvement suggestions**
+For each dimension scoring < 20/25, emit specific actionable improvement:
+- Hook weak → suggest rewrite with stronger opening pattern
+- Engagement low → identify pacing issues, suggest cuts or restructures
+- Value low → identify where content is generic, suggest unique angle
+- Shareability low → suggest quotable reformulations, emotional triggers
+
+#### Example
+
+```typescript
+// Scoring a blog post
+const score = await scoreContent({
+  type: 'article',
+  title: 'How We Cut Our AWS Bill by 60%',
+  content: articleMarkdown,
+  targetPlatforms: ['blog', 'twitter', 'linkedin'],
+});
+
+// Result:
+// {
+//   hook: { score: 22, type: 'statistic', assessment: 'Strong — specific number creates curiosity' },
+//   engagement: { score: 18, readability: 8.2, pacing: 'good', callToAction: true },
+//   value: { score: 20, teaches: true, entertains: false, uniqueInsight: true },
+//   shareability: {
+//     score: 19, emotionalTrigger: 'surprise',
+//     quotable: ['We were paying $12K/mo for a service we used 3% of'],
+//     platformFit: { blog: 9, twitter: 8, linkedin: 9 }
+//   },
+//   total: 79, tier: 'strong'
+// }
+
+// Improvement suggestions:
+// - Shareability: Add a contrarian angle ("Everyone says X, but we found Y")
+// - Engagement: Add a visual comparison (before/after cost graph)
+```
+
+```typescript
+// Scoring a video clip
+const clipScore = await scoreContent({
+  type: 'video-clip',
+  transcript: clipTranscript,
+  duration: 28_000,  // 28 seconds
+  hookType: 'question',
+  targetPlatforms: ['tiktok', 'youtube-shorts', 'instagram-reels'],
+});
+```
+
+---
+
 ### Integration Patterns
 
 **content + analytics**: Fire `content_view`, `scroll_depth`, and `read_complete` events from content pages into the analytics warehouse. Use `@rune/analytics` sql-patterns skill to build read-time dashboards.
@@ -1549,6 +1803,11 @@ Called By ← marketing (L2): when creating blog content
 | JSON-LD structured data has schema errors (no rich snippets in search) | MEDIUM | Validate JSON-LD against Schema.org; test with Google Rich Results Test |
 | Images without blurDataURL cause layout shift on slow connections | MEDIUM | Pre-generate blur placeholders during build; store alongside post metadata |
 | Scheduled post fires twice if cron runs while previous invocation still running | LOW | Use idempotent status transition (published posts skip transition); add cron lock |
+| Whisper large-v3 halluccinates on audio silence (invents words) | HIGH | Preprocess audio: detect silence > 2s, split segments, skip silent chunks |
+| Face detection jitter in vertical crop (anchor jumps between frames) | MEDIUM | Temporal consistency filter: discard jumps > 20% frame width, smooth with 5-frame rolling average |
+| yt-dlp breaks on YouTube bot detection (HTTP 429) | HIGH | Use browser-mimicking headers, exponential backoff, rotate user agents |
+| Virality score subscores don't add to total (LLM math errors) | MEDIUM | Always recalculate total from subscores client-side; validate with Pydantic/Zod |
+| Caption overlay timing drift on variable framerate video | MEDIUM | Normalize to constant framerate (30fps) before caption compositing |
 
 ## Done When
 
@@ -1561,8 +1820,10 @@ Called By ← marketing (L2): when creating blog content
 - Newsletter capture and email delivery configured and tested
 - Images optimized to WebP/AVIF with correct dimensions (no CLS)
 - Core Web Vitals reporter active and LCP < 2.5s on key pages
+- Video repurposing pipeline producing platform-ready vertical clips with captions
+- Content scoring providing actionable improvement suggestions per dimension
 - Structured report emitted for each skill invoked
 
 ## Cost Profile
 
-~12,000–22,000 tokens per full pack run (all skills + new sections). Individual skill: ~2,000–4,000 tokens. Sonnet default. Use haiku for detection scans and alt-text audits; escalate to sonnet for CMS integration and SEO audit; use haiku for search indexing scripts.
+~16,000–28,000 tokens per full pack run (all 7 skills + sections). Individual skill: ~2,000–5,000 tokens. Sonnet default. Use haiku for detection scans and alt-text audits; escalate to sonnet for CMS integration, SEO audit, video pipeline, and content scoring.

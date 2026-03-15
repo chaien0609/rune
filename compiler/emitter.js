@@ -8,7 +8,7 @@
 import { readdir, readFile, mkdir, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
-import { parseSkill, parsePack } from './parser.js';
+import { parseSkill, parsePack, extractCrossRefs, extractToolRefs } from './parser.js';
 import { transformSkill } from './transformer.js';
 
 /**
@@ -158,6 +158,29 @@ export async function buildAll({ runeRoot, outputRoot, adapter, disabledSkills =
       const content = await readFile(packPath, 'utf-8');
       const parsed = parsePack(content, packPath);
       const packName = path.basename(path.dirname(packPath));
+      const packDir = path.dirname(packPath);
+
+      // For split packs, load individual skill files and concatenate into body
+      if (parsed.isSplit && parsed.skillManifest.length > 0) {
+        const skillBodies = [];
+        for (const skill of parsed.skillManifest) {
+          const skillPath = path.join(packDir, skill.file);
+          if (existsSync(skillPath)) {
+            const skillContent = await readFile(skillPath, 'utf-8');
+            // Strip frontmatter from skill file — we only need the body
+            const skillBodyMatch = skillContent.replace(/\r\n/g, '\n').match(/^---\n[\s\S]*?\n---\n?([\s\S]*)$/);
+            const skillBody = skillBodyMatch ? skillBodyMatch[1].trim() : skillContent.trim();
+            skillBodies.push(skillBody);
+          } else {
+            stats.errors.push({ file: skillPath, error: `Skill file not found (listed in ${packPath} manifest)` });
+          }
+        }
+        // Concatenate: index body + all skill bodies
+        parsed.body = parsed.body + '\n\n' + skillBodies.join('\n\n---\n\n');
+        // Re-extract refs from the full concatenated body
+        parsed.crossRefs = extractCrossRefs(parsed.body);
+        parsed.toolRefs = extractToolRefs(parsed.body);
+      }
 
       // Normalize pack name for headers (ext-trading instead of @rune/trading)
       parsed.name = `ext-${packName}`;
@@ -170,9 +193,9 @@ export async function buildAll({ runeRoot, outputRoot, adapter, disabledSkills =
 
       if (adapter.useSkillDirectories) {
         const dirName = `${adapter.skillPrefix}ext-${packName}`;
-        const packDir = path.join(outputDir, dirName);
-        await mkdir(packDir, { recursive: true });
-        outputPath = path.join(packDir, adapter.skillFileName || 'SKILL.md');
+        const outPackDir = path.join(outputDir, dirName);
+        await mkdir(outPackDir, { recursive: true });
+        outputPath = path.join(outPackDir, adapter.skillFileName || 'SKILL.md');
         displayName = `${dirName}/${adapter.skillFileName || 'SKILL.md'}`;
       } else {
         const fileName = outputFileName(`ext-${packName}`, adapter);

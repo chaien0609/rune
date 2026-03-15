@@ -7,6 +7,7 @@
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
+import { parsePack } from './parser.js';
 
 /**
  * Run doctor checks on compiled output
@@ -89,6 +90,18 @@ export async function runDoctor({ outputRoot, adapter, config, runeRoot }) {
     results.warnings.push(`${disabled.length} skills disabled: ${disabled.join(', ')}`);
   }
 
+  // Check 7: Split pack integrity (validate skill manifest files exist)
+  const extensionsDir = path.join(runeRoot, 'extensions');
+  if (existsSync(extensionsDir)) {
+    const splitPackErrors = await checkSplitPacks(extensionsDir);
+    if (splitPackErrors.length === 0) {
+      results.checks.push({ name: 'Split packs', status: 'pass' });
+    } else {
+      results.checks.push({ name: 'Split packs', status: 'fail', detail: `${splitPackErrors.length} missing skill files` });
+      results.errors.push(...splitPackErrors);
+    }
+  }
+
   if (results.errors.length > 0) results.healthy = false;
 
   return results;
@@ -117,6 +130,35 @@ async function checkCrossRefs(outputDir, files, adapter) {
   }
 
   return [...new Set(errors)]; // deduplicate
+}
+
+/**
+ * Check that all split packs have their declared skill files present
+ */
+async function checkSplitPacks(extensionsDir) {
+  const errors = [];
+  const entries = await readdir(extensionsDir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    const packFile = path.join(extensionsDir, entry.name, 'PACK.md');
+    if (!existsSync(packFile)) continue;
+
+    const content = await readFile(packFile, 'utf-8');
+    const parsed = parsePack(content, packFile);
+
+    if (!parsed.isSplit) continue;
+
+    const packDir = path.dirname(packFile);
+    for (const skill of parsed.skillManifest) {
+      const skillPath = path.join(packDir, skill.file);
+      if (!existsSync(skillPath)) {
+        errors.push(`@rune/${entry.name}: skill file "${skill.file}" declared in manifest but not found`);
+      }
+    }
+  }
+
+  return errors;
 }
 
 /**

@@ -153,7 +153,16 @@ This is NOT the full BA elicitation (5 questions). It's a lightweight 2-question
 
 **Goal**: Detect if domain-specific L4 extension packs apply to this task.
 
-After scout completes (Phase 1), check if the detected tech stack or task description matches any L4 extension pack. If a match is found, read the pack's PACK.md to load domain-specific patterns, constraints, and sharp edges into the current workflow.
+After scout completes (Phase 1), check if the detected tech stack or task description matches any L4 extension pack. If a match is found, load the relevant domain-specific patterns, constraints, and sharp edges into the current workflow.
+
+**Split pack protocol** (context-efficient):
+- `Read` the matching PACK.md index (~60-80 lines) — this contains triggers, skill table, connections, and workflows
+- Match the task to the specific skill name in the index's Skills Included table
+- `Read` only the matching skill file(s) from `skills/` subdirectory (e.g., `extensions/backend/skills/auth.md`)
+- Load max 2-3 skill files per invocation — not all skills in the pack
+- Pack-level constraints (from index's Connections and Sharp Edges sections) always apply
+
+**Monolith pack protocol** (legacy): If no `format: split` in PACK.md frontmatter, read the full PACK.md and extract the matching `### skill-name` section as before.
 
 1. Check the project's detected stack against the L4 pack mapping:
 
@@ -180,10 +189,11 @@ After scout completes (Phase 1), check if the detected tech stack or task descri
 | Contract, NDA, compliance, GDPR, IP, legal incident | `@rune-pro/legal` | `extensions/pro-legal/PACK.md` |
 
 2. If ≥1 pack matches:
-   - Use `Read` to load the matching PACK.md
-   - Extract the relevant skill's **Workflow** steps and **Constraints**
+   - Use `Read` to load the matching PACK.md (index if split, full if monolith)
+   - For split packs: identify the relevant skill from the index table, then `Read` only that skill file from `skills/` subdirectory
+   - For monolith packs: extract the relevant `### skill-name` section from the PACK.md body
    - Apply pack constraints alongside cook's own constraints for the rest of the workflow
-   - Announce: "Loaded @rune/[pack] — applying [skill-name] domain patterns"
+   - Announce: "Loaded @rune/[pack] → [skill-name] (split)" or "Loaded @rune/[pack] → [skill-name] (full)"
 
 3. If 0 packs match: skip silently, proceed to Phase 2
 

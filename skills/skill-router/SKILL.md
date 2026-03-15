@@ -162,7 +162,11 @@ These are rarely invoked directly — they're called by Tier 1/2 skills:
 
 #### Tier 4 — Domain Extension Packs (L4)
 
-When user intent matches a domain-specific pattern or user explicitly invokes an L4 trigger command, route to the L4 pack. The agent reads the pack's PACK.md and follows the matching skill's workflow.
+When user intent matches a domain-specific pattern or user explicitly invokes an L4 trigger command, route to the L4 pack.
+
+**Split pack loading** (context-efficient): First `Read` the pack's PACK.md index. If the index contains `format: split` in its frontmatter metadata, it is a split pack — the index lists skills in a table but skill content lives in separate files under `skills/`. Match user intent to the specific skill name in the table, then `Read` only that skill file (e.g., `extensions/backend/skills/api-design.md`). This loads ~100-200 lines instead of ~1000+.
+
+**Monolith pack loading** (legacy): If no `format: split` marker, the PACK.md contains all skills inline — read it fully and extract the matching `### skill-name` section.
 
 | User Intent / Domain Signal | Route To | Pack File |
 |---|---|---|
@@ -187,11 +191,12 @@ When user intent matches a domain-specific pattern or user explicitly invokes an
 | Contract review, NDA, compliance, GDPR, IP audit | `@rune-pro/legal` | `extensions/pro-legal/PACK.md` |
 
 **L4 routing rules:**
-1. If user explicitly invokes an L4 trigger (e.g., `/rune rag-patterns`), read the PACK.md and follow the skill workflow directly
+1. If user explicitly invokes an L4 trigger (e.g., `/rune rag-patterns`), read the PACK.md index first, then load only the matching skill file (split packs) or extract the matching section (monolith packs)
 2. If the intent also involves implementation, route to `cook` (L1) first — cook will detect L4 context in Phase 1.5
 3. L4 packs supplement L1/L2 workflows — they are domain knowledge, not standalone orchestrators
 4. L4 packs can call L3 utilities (scout, verification) but CANNOT call L1 or L2 skills
 5. If the L4 pack file is not found on disk, skip silently and proceed with standard routing
+6. **NEVER load an entire split pack** — always load index first, then only the specific skill file needed
 
 ### Step 1.5 — File Ownership Matrix (Constraint Inheritance)
 

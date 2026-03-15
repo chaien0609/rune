@@ -65,7 +65,7 @@ function parseFrontmatter(content) {
 /**
  * Extract all rune:<name> cross-references from body
  */
-function extractCrossRefs(body) {
+export function extractCrossRefs(body) {
   const refs = [];
   const lines = body.split('\n');
 
@@ -90,7 +90,7 @@ function extractCrossRefs(body) {
 /**
  * Extract all Claude Code tool references from body
  */
-function extractToolRefs(body) {
+export function extractToolRefs(body) {
   const refs = [];
   const lines = body.split('\n');
 
@@ -188,16 +188,25 @@ export function parseSkill(content, filePath = '') {
 
 /**
  * Parse a PACK.md extension file (same format, slightly different metadata)
+ * Supports both monolith format (all skills inline) and split format (skills in separate files)
+ *
+ * Split format detection: metadata.format === "split" OR metadata.skills array present
  */
 export function parsePack(content, filePath = '') {
   const { frontmatter, body } = parseFrontmatter(content);
+  const metadata = frontmatter.metadata || {};
+
+  // Detect split format
+  const isSplit = metadata.format === 'split' || Array.isArray(metadata.skills);
 
   return {
     name: frontmatter.name || '',
     description: frontmatter.description || '',
-    version: frontmatter.version || '1.0.0',
+    version: metadata.version || frontmatter.version || '1.0.0',
     layer: 'L4',
     group: 'extension',
+    isSplit,
+    skillManifest: isSplit ? parseSkillManifest(metadata.skills || []) : [],
     body,
     crossRefs: extractCrossRefs(body),
     toolRefs: extractToolRefs(body),
@@ -206,4 +215,33 @@ export function parsePack(content, filePath = '') {
     filePath,
     frontmatter,
   };
+}
+
+/**
+ * Parse the skills manifest from split PACK.md frontmatter
+ *
+ * @param {Array} skills - array of skill entries from frontmatter metadata.skills
+ * @returns {Array<{name: string, file: string, model: string, description: string}>}
+ */
+function parseSkillManifest(skills) {
+  if (!Array.isArray(skills)) return [];
+
+  return skills.map(skill => {
+    // Handle both string format ("skill-name") and object format ({name, file, model, description})
+    if (typeof skill === 'string') {
+      return {
+        name: skill,
+        file: `skills/${skill}.md`,
+        model: 'sonnet',
+        description: '',
+      };
+    }
+
+    return {
+      name: skill.name || '',
+      file: skill.file || `skills/${skill.name}.md`,
+      model: skill.model || 'sonnet',
+      description: skill.description || '',
+    };
+  });
 }

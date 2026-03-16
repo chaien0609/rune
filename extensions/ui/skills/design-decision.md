@@ -23,6 +23,8 @@ Emit a `design-system.md` file in the project root (or `.rune/`) with: color tok
 
 #### Domain → Style Matrix
 
+The matrix below provides default mappings. When `references/ui-pro-max-data/styles.csv` is available, query it for **84 additional styles** with industry-specific parameters — filter by domain column for expanded recommendations beyond these 10 defaults.
+
 ```
 Domain            Style              Palette              Typography         Component Aesthetic
 ─────────────────────────────────────────────────────────────────────────────────────────────
@@ -39,6 +41,14 @@ DevTools          Terminal + Crisp   terminal-dark        JetBrains Mono+Inter C
 
 * Palette not shown in palette-picker example block — generate with same CSS custom props pattern.
 ```
+
+#### Extended Data (UI/UX Pro Max)
+
+When `references/ui-pro-max-data/` exists:
+- `styles.csv` — 84 styles with color params, animation, WCAG levels, mobile flags
+- `typography.csv` — 73 font pairings with Google Fonts URLs, Tailwind config, mood keywords
+- `ui-reasoning.csv` — 161 industry-specific reasoning rules (filter by domain)
+- Query: filter CSV by domain/category column → get expanded recommendations
 
 #### Style Characteristic Reference
 

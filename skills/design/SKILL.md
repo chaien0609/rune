@@ -57,6 +57,17 @@ Load the design knowledge base before reasoning:
 
 > **Why two layers**: The baseline ships "good enough" universal design knowledge. Users who care about aesthetics create their own `design-dna.md` with curated palettes, font pairings, and style preferences. The design skill works well with either — it just works _better_ with a curated reference.
 
+### External Data Source
+
+Design intelligence data from [UI/UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) (MIT, 42.8k★).
+Located at `references/ui-pro-max-data/` — 161 palettes, 84 styles, 73 font pairings, 161 reasoning rules, 99 UX guidelines.
+
+When `references/ui-pro-max-data/` is available:
+- Step 2: query `styles.csv` for domain-matched visual styles (expands from 10 → 84)
+- Step 3: query `ui-reasoning.csv` for industry-specific design rules (161 rules)
+- Step 3: query `colors.csv` for palette alternatives (expands from 10 → 161)
+- Step 6 (Anti-AI): cross-check proposed style against reasoning DB — if flagged as "AI-generic", suggest 3 alternatives
+
 ### Step 1 — Discover
 
 Invoke `scout` to detect:

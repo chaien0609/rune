@@ -12,6 +12,8 @@ metadata:
 
 # @rune/ui
 
+> Design intelligence data: [UI/UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) (MIT) — 161 palettes, 84 styles, 73 font pairings, 99 UX guidelines. Located at `references/ui-pro-max-data/`.
+
 ## Purpose
 
 Frontend development accumulates invisible debt: ad-hoc color variables, mismatched font pairings, prop-drilled components, untested accessibility, janky animations, React anti-patterns, and slow page loads — all before you even decide what the product should *look* like. This pack addresses all layers systematically. Ten skills cover the full UI lifecycle: React codebase health scoring, Core Web Vitals performance auditing, token consistency, color palette selection, typography pairing, component composability, landing page structure, design-domain mapping, WCAG compliance, and motion polish. Run any skill independently or chain all ten as a comprehensive UI health check + design foundation generator.

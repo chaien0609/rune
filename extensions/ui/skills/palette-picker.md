@@ -26,6 +26,8 @@ Run contrast checks: primary text on background (≥ 4.5:1), large headings (≥
 
 #### Decision Tree
 
+The tree below provides 10 default palettes. When `references/ui-pro-max-data/colors.csv` is available, query it for **161 industry-specific palettes** with full dark/light variants, semantic tokens, and design psychology notes. Filter by domain column for expanded options.
+
 ```
 Product Type          → Palette Recommendation
 ─────────────────────────────────────────────────
@@ -40,6 +42,15 @@ news / content        → Neutral Ink (off-white + near-black, serif-ready)
 productivity / tools  → Calm Focus (gray-50 + indigo-700, minimal noise)
 developer tools       → Terminal Dark (zinc-950 + emerald-400 mono)
 ```
+
+#### Extended Palette DB (UI/UX Pro Max)
+
+When `references/ui-pro-max-data/colors.csv` exists:
+- 161 palettes with Primary, Secondary, Accent, Background, Foreground (dark+light)
+- Semantic tokens: Card, Muted, Border, Destructive, Ring variants
+- Design psychology notes per palette
+- Query: `grep -i "<domain>" references/ui-pro-max-data/colors.csv` → get domain-matched palettes
+- Anti-AI check: if selected palette uses #6366f1 (indigo) or #8b5cf6 (violet) as primary → flag and suggest alternatives from DB
 
 #### Palette Reference
 

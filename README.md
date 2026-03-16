@@ -378,6 +378,10 @@ Quality:           58/58 skills with Output Format, Sharp Edges, Done When, Cost
 Pack Depth:        22 packs total (14 free + 4 pro + 4 business, all free packs rated Deep)
 ```
 
+## Acknowledgments
+
+- **[UI/UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)** (MIT, 42.8k★) — Design intelligence databases powering Rune's `design` skill and `@rune/ui` pack: 161 color palettes, 84 UI styles, 73 font pairings, 99 UX guidelines, 161 industry reasoning rules.
+
 ## License
 
 MIT

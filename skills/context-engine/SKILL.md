@@ -117,6 +117,19 @@ Block further tool calls until compaction is acknowledged.
 
 Emit the context health report to the calling skill.
 
+### Step 6b — Context Percentage Advisory
+
+In addition to tool-call counting, monitor context window percentage when available:
+
+| Remaining | Level | Action |
+|-----------|-------|--------|
+| >35% | SAFE | Continue normally |
+| 25-35% | WARNING | Advise: "Context at ~[X]%. Consider /compact at next phase boundary" |
+| <25% | CRITICAL | Save state via session-bridge → recommend immediate /compact |
+
+Debounce: emit advisory max once per 5 tool calls to avoid noise.
+Tool-call thresholds (Steps 1-2) remain the primary signal. Percentage advisory is supplementary — use when CLI status bar data is available.
+
 ## Context Health Levels
 
 ```

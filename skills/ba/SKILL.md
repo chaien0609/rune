@@ -233,6 +233,16 @@ US-1: As a [persona], I want to [action] so that [benefit]
 ## Risks
 - [risk]: [mitigation strategy]
 
+## Decision Classification
+
+| Category | Meaning | Example |
+|----------|---------|---------|
+| **Decisions** (locked) | User confirmed — agent MUST follow | "Use PostgreSQL, not MongoDB" |
+| **Discretion** (agent decides) | User trusts agent judgment | "Pick the best validation library" |
+| **Deferred** (out of scope) | Explicitly NOT this task | "Mobile app — future phase" |
+
+Plan gates on Decision compliance — Discretion items don't need approval.
+
 ## Next Step
 → Hand off to rune:plan for implementation planning
 ```

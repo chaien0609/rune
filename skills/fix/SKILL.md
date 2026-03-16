@@ -154,6 +154,18 @@ Produce a structured summary of all changes made.
 7. MUST track fix attempt number — this feeds debug's 3-Fix Escalation classification
 8. MUST preserve `#region agent-debug` markers until fix is fully verified — cleanup only after tests pass
 
+## Scope Gate
+
+| Change Type | Action |
+|-------------|--------|
+| Bug fix (diagnosed cause) | Fix it |
+| Security fix (found during fix) | Fix it + flag to sentinel |
+| Blocking issue (can't complete fix without) | Fix it + document in report |
+| Unrelated improvement | **STOP — create separate task** |
+| Architectural change | **STOP — escalate to cook/plan** |
+
+If fix requires touching >3 files not in the diagnosis → re-diagnose. You're probably fixing a symptom.
+
 ## Mesh Gates
 
 | Gate | Requires | If Missing |

@@ -126,6 +126,24 @@ ALL diagnostic code added during debug MUST be wrapped in `#region agent-debug` 
 Unmarked instrumentation will be treated as stray code and removed prematurely.
 </HARD-GATE>
 
+### Step 2c: Check Debug Knowledge Base
+
+Before forming hypotheses, check `.rune/debug/knowledge-base.md`:
+- If file exists → search for matching symptoms/error messages
+- If match found → try known fix FIRST, skip hypothesis cycle
+- If no match → proceed to Step 3
+
+After successful root cause identification (Step 5), append entry:
+```
+### [date] — [symptom summary]
+- **Symptom**: [error message or behavior]
+- **Root Cause**: [what was actually wrong]
+- **Fix**: [what resolved it]
+- **Files**: [affected files]
+```
+
+This prevents re-debugging the same issue across sessions.
+
 ### Step 3: Form Hypotheses
 
 List exactly 2-3 possible root causes — no more, no fewer.

@@ -123,6 +123,23 @@ IF no evidence found:
 UNCONFIRMED — 1 claim lacks evidence, 1 contradicted. Cannot proceed to commit.
 ```
 
+### Step 5 — Evidence Quality Gate
+
+Before emitting verdict, verify evidence quality:
+
+1. **IDENTIFY** — list every claim the agent made (Step 1 output)
+2. **RUN** — confirm verification commands were actually executed (not just planned)
+3. **READ** — read every line of command output (not just exit code)
+4. **VERIFY** — match each claim to a specific evidence quote (file:line or output snippet)
+5. **CLAIM** — only mark CONFIRMED if evidence quote directly supports the claim
+
+| Evidence Quality | Verdict |
+|-----------------|---------|
+| Exit code 0 only, no output read | INSUFFICIENT — re-run and read output |
+| Output read but no quote matched to claim | UNCONFIRMED — cite specific evidence |
+| Quote matches claim exactly | CONFIRMED |
+| Quote contradicts claim | CONTRADICTED |
+
 ## Verdict Rules
 
 ```

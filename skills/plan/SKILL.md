@@ -171,6 +171,11 @@ Save to `.rune/plan-<feature>.md`:
 - <decision 1 — chosen approach and why>
 - <decision 2>
 
+## Decision Compliance
+- Decisions (locked): [list from requirements.md — plan MUST honor these]
+- Discretion (agent): [list — agent chose X because Y]
+- Deferred: [list — explicitly excluded from this feature]
+
 ## Architecture
 <brief system diagram or component list — NOT implementation detail>
 
@@ -226,17 +231,27 @@ function validateInput(raw: unknown): TradeEntry[];  // throws ValidationError
 ```
 
 ## Tasks
+
+Each task MUST include: **File** (exact path), **Test** (test file or N/A), **Verify** (shell command), **Commit** (semantic message). Granularity: 2-5 min per task. If >10min, decompose.
+
 - [ ] Task 1 — Create calculateProfit function
-  - File: `src/foo/bar.ts`
-  - Create: `function calculateProfit(entries: TradeEntry[]): ProfitResult`
+  - File: `src/foo/bar.ts` (new)
+  - Test: `tests/foo/bar.test.ts` (new)
+  - Verify: `npm test -- --grep "calculateProfit"`
+  - Commit: `feat(trading): add calculateProfit with fee calculation`
   - Logic: sum entries by side, apply fees (0.1% per trade), return net P&L
   - Edge: empty array → return { netPnL: 0, totalFees: 0, winRate: 0 }
 - [ ] Task 2 — Add input validation
-  - File: `src/foo/baz.ts`
-  - Modify: add `validateInput()` before processing
+  - File: `src/foo/baz.ts` (modify)
+  - Test: `tests/foo/baz.test.ts` (new)
+  - Verify: `npm test -- --grep "validateInput"`
+  - Commit: `feat(trading): add input validation for trade entries`
   - Logic: check side is 'long'|'short', prices > 0, quantity > 0
-- [ ] Task 3 — Write tests
-  - File: `tests/foo/bar.test.ts`
+- [ ] Task 3 — Write integration tests
+  - File: `tests/foo/bar.test.ts` (modify)
+  - Test: N/A — this IS the test task
+  - Verify: `npm test -- --grep "trading" && npx tsc --noEmit`
+  - Commit: `test(trading): add integration tests for edge cases`
   - Cases: happy path, empty input, negative values, overflow
 
 ## Failure Scenarios
@@ -503,6 +518,8 @@ Max 200 lines. Self-contained — coder needs ONLY this file.
 | Plan without scout context — invented file paths | CRITICAL | Step 1: scout first, always |
 | Phase with zero test tasks | CRITICAL | HARD-GATE rejects it |
 | 10+ phases overwhelming the master plan | MEDIUM | Max 8 phases — split into sub-projects if more |
+| Task without File path or Verify command | HIGH | Every task MUST have File + Test + Verify + Commit fields — no vague "implement the feature" tasks |
+| Plan ignores locked Decisions from BA | CRITICAL | Decision Compliance section cross-checks requirements.md — locked decisions are non-negotiable |
 
 ## Done When
 

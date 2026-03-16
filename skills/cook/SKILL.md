@@ -592,6 +592,20 @@ When cook completes (whether standalone or invoked by `team`), it MUST return on
 
 **BLOCKED format**: Include the phase, the sub-skill that emitted BLOCKED, the specific blocker, and what was already attempted.
 
+## Deviation Rules
+
+When implementation diverges from plan:
+
+| Rule | Scope | Action | Example |
+|------|-------|--------|---------|
+| R1: Bug fix | Code doesn't work as planned | Auto-fix, continue | Test fails due to typo, missing import |
+| R2: Security fix | Vulnerability discovered | Auto-fix, continue | SQL injection, XSS, hardcoded secret |
+| R3: Blocking fix | Can't proceed without change | Auto-fix, continue | Missing dependency, wrong API signature |
+| R4: Architectural change | Different approach than planned | **ASK user first** | New database table, changed API contract, different library |
+
+R1-R3: security primitives and correctness fixes are NOT features — fix silently.
+R4: if you catch yourself thinking "this is a better way" — STOP and ask. The plan was approved for a reason.
+
 ## Error Recovery
 
 | Phase | If this fails... | Do this... |
@@ -604,6 +618,23 @@ When cook completes (whether standalone or invoked by `team`), it MUST return on
 | 5b SENTINEL | Security CRITICAL found | Fix immediately → re-run (mandatory) |
 | 5c REVIEW | Code quality issues | Fix CRITICAL/HIGH → re-review (max 2 loops) |
 | 6 VERIFY | Build/lint/type fails | Fix → re-run verification |
+
+### Repair Operators (before escalation)
+
+When a task fails during Phase 4 (IMPLEMENT):
+
+| Operator | When | Action |
+|----------|------|--------|
+| **RETRY** | Transient failure (network, timeout, flaky test) | Re-run same approach, max 2 attempts |
+| **DECOMPOSE** | Task too complex, partial progress | Split into 2-3 smaller tasks, continue |
+| **PRUNE** | Approach fundamentally wrong | Remove failed code, try different approach from plan |
+
+**Budget**: 2 repair attempts per task. After 2 failures → escalate:
+- Same error both times → `debug` for root cause
+- Different errors → `plan` to redesign the task
+- All approaches exhausted → `brainstorm(rescue)` for alternative category
+
+Do NOT ask user until repair budget is spent.
 
 ## Called By (inbound)
 

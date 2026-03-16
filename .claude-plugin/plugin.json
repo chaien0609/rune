@@ -4,5 +4,9 @@
   "description": "58-skill mesh for Claude Code — 200+ connections, adaptive routing, mesh analytics. Use rune:cook for any code task, rune:team for parallel work, rune:launch for deploy, rune:rescue for legacy code.",
   "author": {
     "name": "Rune Contributors"
-  }
+  },
+  "repository": "https://github.com/rune-kit/rune",
+  "homepage": "https://github.com/rune-kit/rune",
+  "license": "MIT",
+  "keywords": ["skills", "mesh", "tdd", "multi-platform", "coding-agent"]
 }

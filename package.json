@@ -43,7 +43,9 @@
     "extensions/",
     "contexts/",
     "commands/",
-    "agents/"
+    "agents/",
+    "hooks/",
+    "docs/"
   ],
   "homepage": "https://github.com/rune-kit/rune",
   "bugs": {

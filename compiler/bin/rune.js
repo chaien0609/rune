@@ -102,7 +102,7 @@ async function cmdInit(projectRoot, args) {
     $schema: 'https://rune-kit.github.io/rune/config-schema.json',
     version: 1,
     platform,
-    source: RUNE_ROOT,
+    source: '@rune-kit/rune',
     skills: {
       disabled: args.disable ? args.disable.split(',') : [],
     },
@@ -136,7 +136,10 @@ async function cmdInit(projectRoot, args) {
   }
 
   log('');
-  log('  Next: Start coding. Rune skills are active in your AI assistant.');
+  log('  Next steps:');
+  log('    1. /rune onboard       Generate project context (CLAUDE.md + .rune/)');
+  log('    2. /rune cook "..."    Build a feature (full TDD cycle)');
+  log('    3. /rune help          See all 58 skills');
   log('');
 }
 
@@ -155,7 +158,9 @@ async function cmdBuild(projectRoot, args) {
   }
 
   const adapter = getAdapter(platform);
-  const runeRoot = config?.source || RUNE_ROOT;
+  const runeRoot = (config?.source === '@rune-kit/rune')
+    ? RUNE_ROOT
+    : (config?.source || RUNE_ROOT);
   const outputRoot = typeof args.output === 'string' ? args.output : projectRoot;
   const disabledSkills = config?.skills?.disabled || [];
   const enabledPacks = config?.extensions?.enabled || null;
@@ -201,7 +206,9 @@ async function cmdDoctor(projectRoot, args) {
 
   const platform = args.platform || config.platform;
   const adapter = getAdapter(platform);
-  const runeRoot = config.source || RUNE_ROOT;
+  const runeRoot = (config.source === '@rune-kit/rune')
+    ? RUNE_ROOT
+    : (config.source || RUNE_ROOT);
 
   const results = await runDoctor({
     outputRoot: projectRoot,
@@ -252,6 +259,13 @@ async function main() {
   const { command, args } = parseArgs(process.argv.slice(2));
   const projectRoot = process.cwd();
 
+  // Handle --version / -v as flag (not positional command)
+  if (args.version || args.v) {
+    const pkg = JSON.parse(await readFile(path.join(RUNE_ROOT, 'package.json'), 'utf-8'));
+    log(`  rune v${pkg.version}`);
+    return;
+  }
+
   switch (command) {
     case 'init':
       await cmdInit(projectRoot, args);
@@ -262,6 +276,13 @@ async function main() {
     case 'doctor':
       await cmdDoctor(projectRoot, args);
       break;
+    case 'version':
+    case '--version':
+    case '-v': {
+      const pkg = JSON.parse(await readFile(path.join(RUNE_ROOT, 'package.json'), 'utf-8'));
+      log(`  rune v${pkg.version}`);
+      break;
+    }
     case 'help':
     case '--help':
     case undefined:
@@ -277,6 +298,7 @@ async function main() {
       log('    --platform <name>   Override platform (cursor, windsurf, antigravity, codex, openclaw, opencode, generic)');
       log('    --output <dir>      Override output directory');
       log('    --disable <skills>  Comma-separated skills to disable');
+      log('    --version, -v       Show version');
       log('');
       break;
     default:

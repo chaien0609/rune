@@ -68,10 +68,11 @@ Rune started as a **Claude Code plugin** and now compiles to **every major AI ID
 ### Claude Code (Native Plugin)
 
 ```bash
-# Via Claude Code plugin marketplace
-/plugin marketplace add rune-kit/rune
-/plugin install rune@rune-kit
+# Install via Claude Code CLI
+claude plugin add rune-kit/rune
 ```
+
+Or add manually in `~/.claude/settings.json` under `installed_plugins`.
 
 Full mesh: subagents, hooks, adaptive routing, mesh analytics.
 
@@ -355,13 +356,13 @@ See [docs/MULTI-PLATFORM.md](docs/MULTI-PLATFORM.md) for the full architecture.
 
 ```
 Core Skills:       58 (L0: 1 │ L1: 5 │ L2: 27 │ L3: 25)
-Extension Packs:   14 free + 4 pro + 2 business
+Extension Packs:   14 free + 4 pro + 4 business
 Mesh Connections:  200+ cross-references
 Connections/Skill: 3.4 avg
 Platforms:         8 (Claude Code, Cursor, Windsurf, Antigravity, Codex, OpenCode, OpenClaw, Generic)
 Compiler:          ~1400 LOC (parser + 8 transforms + 8 adapters + CLI)
 Quality:           58/58 skills with Output Format, Sharp Edges, Done When, Cost Profile
-Pack Depth:        20 packs total (14 free + 4 pro + 2 business, all free packs rated Deep)
+Pack Depth:        22 packs total (14 free + 4 pro + 4 business, all free packs rated Deep)
 ```
 
 ## License

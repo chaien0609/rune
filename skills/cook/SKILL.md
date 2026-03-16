@@ -641,6 +641,24 @@ When cook completes (whether standalone or invoked by `team`), it MUST return on
 - `worktree` (L3): Phase 4 — worktree isolation for parallel implementation
 - L4 extension packs: Phase 1.5 — domain-specific patterns when stack matches (see Phase 1.5 mapping table)
 
+## Analysis Paralysis Guard
+
+<HARD-GATE>
+5+ consecutive read-only tool calls (Read, Grep, Glob) without a single write action (Edit, Write, Bash) = STUCK.
+
+You MUST either:
+1. **Act** — write code, run a command, create a file
+2. **Report BLOCKED** — state the specific missing piece: "Cannot proceed because [X]"
+
+Stuck patterns (all banned):
+- Reading 10+ files to "fully understand" before acting
+- Grepping every variation of a string across the entire repo
+- Reading the same file twice in one investigation
+- "Let me check one more thing" — repeated after 5 reads
+
+A wrong first attempt that produces feedback beats perfect understanding that never ships.
+</HARD-GATE>
+
 ## Constraints
 
 1. MUST run scout before planning — no plan based on assumptions alone
@@ -699,6 +717,7 @@ Known failure modes for this skill. Check these before declaring done.
 | Not escalating to sentinel:opus on security-sensitive tasks | MEDIUM | Auth, crypto, payment code → sentinel must run at opus, not sonnet |
 | Running Phase 5 checks sequentially instead of parallel | MEDIUM | Launch preflight+sentinel+review as parallel Task agents for speed |
 | Saying "done" without evidence trail | CRITICAL | completion-gate validates claims — UNCONFIRMED = BLOCK |
+| Analysis paralysis — 5+ reads without writing | HIGH | Analysis Paralysis Guard: act on incomplete info or report BLOCKED with specific missing piece |
 | Fast mode on security-relevant code | HIGH | Fast mode auto-excludes auth/crypto/payments — never fast-track security code |
 | Loading all phase files at once into context | HIGH | Phase File Gate: load ONLY the active phase file — one phase per session |
 | Resuming without checking master plan | MEDIUM | Phase 0 (RESUME CHECK) runs before Phase 1 — detects existing plans |

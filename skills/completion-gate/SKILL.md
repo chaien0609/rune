@@ -4,7 +4,7 @@ description: "Validates agent claims against evidence trail. Catches 'done' with
 user-invocable: false
 metadata:
   author: runedev
-  version: "1.1.0"
+  version: "1.2.0"
   layer: L3
   model: haiku
   group: validation
@@ -57,6 +57,21 @@ CLAIM PATTERNS:
 ```
 
 Extract each claim as: `{ claim: string, source_skill: string }`
+
+### Step 1b — Stub Detection (Existence Theater Check)
+
+Before checking claims, scan all files created/modified in this workflow for stubs:
+
+```
+Grep for stub patterns in new/modified files:
+- "Placeholder" | "TODO" | "Not implemented" | "NotImplementedError"
+- Functions with body: only `return null` / `return {}` / `pass` / `throw`
+- Components returning only a single div with no logic
+```
+
+If ANY stub detected:
+- Add synthetic claim: "implemented [filename]" → CONTRADICTED (file is a stub)
+- This catches agents that create files but don't implement them
 
 ### Step 2 — Match Evidence
 
@@ -137,6 +152,7 @@ Completion Gate Report with status (CONFIRMED/UNCONFIRMED/CONTRADICTED), claim v
 | Evidence from a DIFFERENT test run (stale) | HIGH | Check that evidence timestamp/context matches current changes |
 | Agent pre-generates evidence by running commands proactively | LOW | This is actually GOOD behavior — we want agents to provide evidence |
 | Completion-gate itself claims "all confirmed" without evidence | CRITICAL | Gate report MUST include the evidence table — no table = report is invalid |
+| Existence Theater — agent creates files but they're stubs | HIGH | Step 1b stub detection: grep for Placeholder/TODO/NotImplementedError in new files |
 
 ## Done When
 

@@ -188,6 +188,16 @@ Produce structured output and hand off to rune:fix.
 - Call `rune:fix` with the full report if fix is needed
 - Do NOT apply any code changes — report only
 
+## Analysis Paralysis Guard
+
+<HARD-GATE>
+Debug is read-heavy by nature — but there are limits.
+
+After Step 4 (Test Hypotheses): if NO hypothesis is confirmed after 3 cycles of Steps 2-4, you MUST stop and escalate. Do NOT start cycle 4. Report all evidence gathered and escalate to problem-solver or sequential-thinking.
+
+Within any single step: 5+ consecutive Read/Grep calls without forming or testing a hypothesis = stuck. Stop reading, form a hypothesis from what you have, and test it. Incomplete hypotheses that get tested are better than perfect hypotheses that never form.
+</HARD-GATE>
+
 ## Red Flags — STOP and Return to Step 2
 
 If you catch yourself thinking any of these, you are GUESSING, not debugging:
@@ -199,6 +209,7 @@ If you catch yourself thinking any of these, you are GUESSING, not debugging:
 - "Here are the main problems: [lists fixes without investigation]"
 - Proposing solutions before tracing data flow
 - "One more fix attempt" (when already tried 2+)
+- "Let me read one more file before forming a hypothesis" (after 5+ reads)
 
 ALL of these mean: STOP. Return to Step 2 (Gather Evidence).
 

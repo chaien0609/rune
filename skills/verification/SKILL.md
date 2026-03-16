@@ -3,7 +3,7 @@ name: verification
 description: "Universal verification runner. Runs lint, type-check, tests, and build. Use after any code change to verify nothing is broken."
 metadata:
   author: runedev
-  version: "0.3.0"
+  version: "0.4.0"
   layer: L3
   model: haiku
   group: validation
@@ -98,7 +98,54 @@ If build fails: record first 20 lines of build output, mark as FAIL.
 
 Compile all results into the structured report. Update all TodoWrite items to completed.
 
-### Artifact Verification
+### 3-Level Artifact Verification
+
+> From GSD (gsd-build/get-shit-done, 30.8k★): "Task done ≠ Goal achieved."
+
+Every file created or modified during implementation must pass ALL 3 levels:
+
+**Level 1 — EXISTS**: File is on disk, non-empty.
+```
+Glob("path/to/expected/file") → found
+```
+
+**Level 2 — SUBSTANTIVE**: Contains real logic, NOT a stub. Scan for these stub patterns:
+
+| Pattern | Language | Meaning |
+|---|---|---|
+| Component returns only `<div>Placeholder</div>` or `<div>TODO</div>` | React/Vue | Stub component |
+| Route returns `{ message: "Not implemented" }` or `res.status(501)` | API | Stub endpoint |
+| Function body is only `return null` / `return {}` / `return []` / `pass` | Any | Stub function |
+| Class with all methods throwing `NotImplementedError` | Python/Java | Stub class |
+| `useEffect` with empty body / `async function` with no `await` | React/JS | Hollow implementation |
+| File has only type/interface exports but no implementation | TypeScript | Stub types-only file |
+| `// TODO` or `# TODO` as the only content in a function | Any | Placeholder |
+
+If ANY stub pattern detected → mark file as STUB, Level 2 FAIL.
+
+**Level 3 — WIRED**: Actually imported/called/used by the rest of the system.
+
+| File Type | Wiring Check |
+|---|---|
+| Component | `Grep("<ComponentName")` in parent files → ≥1 consumer |
+| API route | `Grep("fetch\\|axios\\|api.*endpoint")` for this path → ≥1 caller |
+| Hook | `Grep("useHookName(")` → ≥1 consumer |
+| Utility function | `Grep("import.*from.*this-file")` → ≥1 importer |
+| DB model/schema | `Grep("ModelName\\|table_name")` in query files → ≥1 reference |
+| CSS/style module | `Grep("import.*from.*this-style")` → ≥1 importer |
+
+If file has 0 consumers → mark as UNWIRED, Level 3 FAIL.
+
+**Exception**: Entry-point files (main.ts, index.ts, App.tsx, routes config) are exempt from Level 3 — they ARE the top-level consumers.
+
+<HARD-GATE name="3-level-verification">
+ALL new files must pass Level 1 + Level 2 + Level 3.
+EXISTS but STUB = "Existence Theater" — agent created files but didn't implement them.
+EXISTS and SUBSTANTIVE but UNWIRED = dead code — created but never connected.
+Report which level failed for each file in the Verification Report.
+</HARD-GATE>
+
+### Artifact Output Verification
 
 > Inspired by CLI-Anything (HKUDS/CLI-Anything, 14.5k★): "Never trust exit 0."
 > Many tools exit 0 even when they fail silently. Always verify ACTUAL output.
@@ -168,6 +215,13 @@ Types:     [PASS/FAIL/SKIP] ([X errors])
 Tests:     [PASS/FAIL/SKIP] ([passed]/[total], [coverage]%)
 Build:     [PASS/FAIL/SKIP]
 
+### 3-Level File Verification
+| File | L1 Exists | L2 Substantive | L3 Wired | Verdict |
+|------|-----------|----------------|----------|---------|
+| src/auth/login.ts | ✓ | ✓ | ✓ (imported by routes.ts) | PASS |
+| src/auth/reset.ts | ✓ | STUB (returns null) | — | FAIL L2 |
+| src/utils/format.ts | ✓ | ✓ | UNWIRED (0 importers) | FAIL L3 |
+
 Overall:   [PASS/FAIL]
 
 ### Failures (if any)
@@ -175,6 +229,8 @@ Overall:   [PASS/FAIL]
 - Types: [first 5 type errors]
 - Tests: [first 5 failing test names]
 - Build: [first 5 build errors]
+- Stubs: [files that failed Level 2 with stub pattern detected]
+- Unwired: [files that failed Level 3 with 0 consumers]
 ```
 
 ## Evidence-Before-Claims Gate
@@ -226,6 +282,8 @@ Known failure modes for this skill. Check these before declaring done.
 | Stopping after first failure instead of running remaining checks | MEDIUM | Run all checks; aggregate all failures so developer can fix everything at once |
 | Reporting PASS when output has warnings but zero errors | LOW | PASS is correct but note warning count — caller decides if warnings matter |
 | Trusting exit code 0 without output verification | CRITICAL | Artifact Verification HARD-GATE: always confirm success indicator in stdout (pass count, "0 errors", output file exists) |
+| Existence Theater — file exists but is a stub | HIGH | 3-Level check: Level 2 scans for stub patterns (`<div>Placeholder</div>`, `return null`, `NotImplementedError`) |
+| Dead code — file created but never imported/used | MEDIUM | 3-Level check: Level 3 greps for consumers. 0 importers = UNWIRED |
 
 ## Done When
 

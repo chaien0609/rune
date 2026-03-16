@@ -26,9 +26,11 @@ Mesh:      A ↔ B ↔ C             (B fails = A reaches C via D→E)
            D ↔ E ↔ F
 ```
 
-## What's New (v2.2.1)
+## What's New (v2.2.2)
 
-- **Enforcement Upgrade** — Antigravity-level IDE compliance: 5-type Request Classifier, File Ownership Matrix, Self-Verification HARD-GATE, Routing Proof, Clarification Gate, Phase Transition Protocol. Distributed via compiler — every skill file gets compliance preamble on non-Claude platforms
+- **UI/UX Pro Max Integration** — 161 palettes, 84 styles, 73 font pairings, 161 reasoning rules from [UI/UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) (MIT, 42.8k★) meshed into `design` skill + `@rune/ui` pack
+- **11 Core Skill Enrichments** — deviation rules, repair operators, evidence quality gate, decision classification, debug knowledge base, CSO discipline, YAGNI pushback, formal pause/resume
+- **Enforcement Upgrade** — Antigravity-level IDE compliance: 5-type Request Classifier, File Ownership Matrix, Self-Verification HARD-GATE, Routing Proof, Clarification Gate, Phase Transition Protocol
 - **All 14 Free Packs Deep** — every L4 extension pack now exceeds 500 lines of production-ready patterns and code examples
 - **8 Platform Adapters** — Claude Code, Cursor, Windsurf, Google Antigravity, OpenAI Codex, OpenCode, OpenClaw, Generic
 - **58 Core Skills** — +3 since v2.1.0: adversary (red team), sentinel-env (env validation), chrome-ext pack

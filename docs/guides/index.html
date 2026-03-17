@@ -561,22 +561,26 @@
           <button class="tab-btn" data-tab="install-cursor">Cursor</button>
           <button class="tab-btn" data-tab="install-windsurf">Windsurf</button>
           <button class="tab-btn" data-tab="install-antigravity">Antigravity</button>
+          <button class="tab-btn" data-tab="install-openclaw">OpenClaw</button>
         </div>
 
         <div class="tab-panel active" id="install-claude">
           <p>Claude Code uses Rune as a <strong>native plugin</strong> — no compilation needed.</p>
           <div class="code-wrapper">
-            <div class="code-block"><span class="comment"># Install the plugin</span>
-<span class="cmd">claude plugin install rune-kit/rune</span>
+            <div class="code-block"><span class="comment"># Step 1: Add marketplace (one-time)</span>
+<span class="cmd">claude plugin marketplace add rune-kit/rune</span>
+
+<span class="comment"># Step 2: Install the plugin</span>
+<span class="cmd">claude plugin install rune</span>
 
 <span class="comment"># Verify it's loaded</span>
 <span class="cmd">claude</span>
 <span class="output">  58 skills loaded from rune</span></div>
-            <button class="copy-btn" data-copy="claude plugin install rune-kit/rune">Copy</button>
+            <button class="copy-btn" data-copy="claude plugin marketplace add rune-kit/rune && claude plugin install rune">Copy</button>
           </div>
           <div class="callout callout-tip">
-            <strong>Tip:</strong> Claude Code loads SKILL.md files directly from the plugin source.
-            No compilation step, no configuration needed. Just install and go.
+            <strong>Tip:</strong> The marketplace only needs to be added once. After that,
+            just <code>claude plugin install rune</code> or <code>claude plugin update rune</code>.
           </div>
         </div>
 
@@ -616,6 +620,21 @@
             <strong>Note:</strong> Antigravity is currently in early access. Install it from
             <a href="https://idx.google.com/" target="_blank" rel="noopener">idx.google.com</a> (Project IDX)
             or via your Google Cloud workspace.
+          </div>
+        </div>
+
+        <div class="tab-panel" id="install-openclaw">
+          <p>OpenClaw uses Rune as a unified mesh package from <strong>ClawHub</strong>.</p>
+          <div class="code-wrapper">
+            <div class="code-block"><span class="cmd">clawhub install rune-kit</span>
+
+<span class="comment"># All 58 skills installed as one mesh package</span>
+<span class="comment"># Works with any OpenClaw-compatible agent</span></div>
+            <button class="copy-btn" data-copy="clawhub install rune-kit">Copy</button>
+          </div>
+          <div class="callout callout-info">
+            <strong>Note:</strong> Rune is published as a single unified package on ClawHub.
+            Individual skills are NOT published separately — the mesh requires all skills together.
           </div>
         </div>
       </div>
@@ -933,8 +952,11 @@
       </p>
 
       <div class="code-wrapper">
-        <div class="code-block"><span class="comment"># Install</span>
-<span class="cmd">claude plugin install rune-kit/rune</span>
+        <div class="code-block"><span class="comment"># Step 1: Add marketplace (one-time)</span>
+<span class="cmd">claude plugin marketplace add rune-kit/rune</span>
+
+<span class="comment"># Step 2: Install</span>
+<span class="cmd">claude plugin install rune</span>
 
 <span class="comment"># Use any skill directly</span>
 <span class="cmd">/rune cook "add user authentication"</span>
@@ -1036,6 +1058,25 @@
       <div class="callout callout-info">
         <strong>Note:</strong> OpenCode also searches <code>.claude/skills/</code> and
         <code>.agents/skills/</code> — so Claude-compatible skill formats work too.
+      </div>
+
+      <h2 id="ide-openclaw">OpenClaw (ClawHub)</h2>
+
+      <p>
+        OpenClaw agents can install Rune from <strong>ClawHub</strong> — the skill registry for the
+        OpenClaw ecosystem. Rune is published as a single unified package (not individual skills).
+      </p>
+
+      <div class="code-wrapper">
+        <div class="code-block"><span class="cmd">clawhub install rune-kit</span>
+
+<span class="comment"># All 58 skills + 14 extension packs as one mesh package</span>
+<span class="comment"># Slug: rune-kit on clawhub.ai</span></div>
+      </div>
+
+      <div class="callout callout-warn">
+        <strong>Important:</strong> Rune skills are NOT published individually on ClawHub.
+        The mesh requires all 200+ connections to function — installing skills separately would break routing.
       </div>
 
       <div class="callout callout-info">

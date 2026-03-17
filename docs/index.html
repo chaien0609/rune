@@ -61,7 +61,7 @@
       <canvas id="mesh-canvas"></canvas>
     </div>
     <div class="hero-content">
-      <p class="hero-badge">v2.2.1 &mdash; 58 skills &bull; 8 platforms &bull; MIT</p>
+      <p class="hero-badge">v2.2.2 &mdash; 58 skills &bull; 8 platforms &bull; MIT</p>
       <h1>Less skills.<br><span class="accent">Deeper connections.</span></h1>
       <p class="hero-sub">A mesh ecosystem for AI coding assistants. Skills call each other bidirectionally, forming resilient workflows that adapt when things go wrong.</p>
       <div class="hero-actions">
@@ -244,7 +244,11 @@ D &harr; E &harr; F
         <div class="install-card">
           <h3>Claude Code</h3>
           <p class="install-badge">Native Plugin</p>
-          <pre class="code-block"><code>/plugin install rune@rune-kit</code></pre>
+          <pre class="code-block"><code># Add marketplace (one-time)
+claude plugin marketplace add rune-kit/rune
+
+# Install plugin
+claude plugin install rune</code></pre>
           <p>Full mesh: subagents, hooks, adaptive routing, analytics.</p>
         </div>
         <div class="install-card">
@@ -253,6 +257,67 @@ D &harr; E &harr; F
           <pre class="code-block"><code>npx @rune-kit/rune init</code></pre>
           <p>Auto-detects platform. Compiles all 58 skills to native rule format.</p>
         </div>
+        <div class="install-card">
+          <h3>OpenClaw</h3>
+          <p class="install-badge">ClawHub Registry</p>
+          <pre class="code-block"><code>clawhub install rune-kit</code></pre>
+          <p>58 skills as unified mesh package. Works with any OpenClaw agent.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GUIDES DIRECTORY -->
+  <section class="section section-dark" id="learn">
+    <div class="container">
+      <h2>Learn Rune</h2>
+      <p class="section-sub">From first install to advanced mesh orchestration &mdash; everything in one place.</p>
+      <div class="guide-grid">
+        <a href="guides/#install" class="guide-link">
+          <span class="guide-icon">&#9889;</span>
+          <div>
+            <strong>Quick Start</strong>
+            <span>Install + first run in 2 minutes</span>
+          </div>
+        </a>
+        <a href="guides/#mesh-architecture" class="guide-link">
+          <span class="guide-icon">&#9670;</span>
+          <div>
+            <strong>Mesh Architecture</strong>
+            <span>How 200+ connections work</span>
+          </div>
+        </a>
+        <a href="guides/#wf-cook" class="guide-link">
+          <span class="guide-icon">&#9881;</span>
+          <div>
+            <strong>Workflows</strong>
+            <span>cook, rescue, team, debug</span>
+          </div>
+        </a>
+        <a href="guides/#ide-claude" class="guide-link">
+          <span class="guide-icon">&#128187;</span>
+          <div>
+            <strong>Platform Guides</strong>
+            <span>Claude, Cursor, Windsurf, Codex, OpenClaw</span>
+          </div>
+        </a>
+        <a href="guides/#ext-using" class="guide-link">
+          <span class="guide-icon">&#128230;</span>
+          <div>
+            <strong>Extension Packs</strong>
+            <span>14 domain packs + create your own</span>
+          </div>
+        </a>
+        <a href="guides/#faq" class="guide-link">
+          <span class="guide-icon">&#10067;</span>
+          <div>
+            <strong>FAQ &amp; Troubleshooting</strong>
+            <span>Common issues + answers</span>
+          </div>
+        </a>
+      </div>
+      <div style="text-align:center;margin-top:24px">
+        <a href="guides/" class="btn btn-ghost">View Full Guide &rarr;</a>
       </div>
     </div>
   </section>

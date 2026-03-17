@@ -245,7 +245,7 @@ a:hover { opacity: 0.85; }
 .feature-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
 
 /* ─── INSTALL ─── */
-.install-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 800px; margin: 0 auto; }
+.install-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; max-width: 960px; margin: 0 auto; }
 .install-card {
   background: var(--bg-card); border: 1px solid var(--border);
   border-radius: var(--radius-lg); padding: 32px; text-align: center;
@@ -263,6 +263,23 @@ a:hover { opacity: 0.85; }
   overflow-x: auto;
 }
 .install-card p:last-child { font-size: 14px; color: var(--text-secondary); }
+
+/* ─── GUIDE DIRECTORY ─── */
+.guide-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px; max-width: 960px; margin: 0 auto;
+}
+.guide-link {
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px 20px; background: var(--bg-card);
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  color: var(--text-primary);
+  transition: border-color var(--transition), transform var(--transition);
+}
+.guide-link:hover { border-color: var(--accent); transform: translateY(-2px); opacity: 1; }
+.guide-icon { font-size: 24px; flex-shrink: 0; }
+.guide-link strong { display: block; font-size: 15px; margin-bottom: 2px; }
+.guide-link span { font-size: 13px; color: var(--text-secondary); }
 
 /* ─── PRICING ─── */
 

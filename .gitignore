@@ -25,3 +25,4 @@ docs/dashboard.html
 # Environment
 .env
 .env.local
+.gitnexus

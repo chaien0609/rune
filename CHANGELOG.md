@@ -3,6 +3,39 @@
 All notable changes to Rune are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.2.5] - 2026-03-18
+
+### Improved
+- **ba v0.3.0** — Structured Elicitation Frameworks (PICO, INVEST, Jobs-to-be-Done) with decision table for framework selection per requirement type
+- **research v0.3.0** — Minimum 3 Complementary Sources HARD-GATE, source type taxonomy, domain diversity rule, triangulation-based synthesis
+- **completion-gate v1.4.0** — Default-FAIL QA mindset HARD-GATE, adversarial validation checklist, skeptic sweep on weakest claims
+
+### Sources
+- K-Dense claude-scientific-skills (170 skills, literature-review PICO pattern)
+- msitarzewski/agency-agents (50.8k★, Default-FAIL QA mindset)
+
+## [2.2.4] - 2026-03-17
+
+### Improved
+- **plan v0.6.0** — Workflow Registry 4-view (by Workflow, Component, User Journey, State)
+- **team v0.5.0** — NEXUS Handoff Templates with metadata/context/deliverables/quality/evidence
+- **cook v0.9.0** — NEXUS-enhanced Cook Report with Deliverables table + Acceptance Criteria tracking
+
+### Sources
+- msitarzewski/agency-agents (50.8k★)
+
+## [2.2.3] - 2026-03-15
+
+### Improved
+- **7 core skills enriched** from CLI-Anything (17.4k★), GSD (30.8k★), taste-skill (3.4k★)
+- test v0.5.0, verification v0.5.0, cook v0.8.0, plan v0.5.0, hallucination-guard v0.3.0, sentinel-env v0.2.0, completion-gate v1.3.0
+
+## [2.2.2] - 2026-03-14
+
+### Improved
+- **4 core skills enriched** from superpowers (89k★)
+- review v0.3.0, review-intake v1.1.0, skill-forge v1.2.0, completion-gate v1.2.0
+
 ## [2.2.1] - 2026-03-14
 
 ### Added

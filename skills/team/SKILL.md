@@ -5,7 +5,7 @@ context: fork
 agent: general-purpose
 metadata:
   author: runedev
-  version: "0.4.0"
+  version: "0.5.0"
   layer: L1
   model: opus
   group: orchestrator
@@ -152,7 +152,11 @@ Mark todo[1] `in_progress`.
 
 **2a. Launch parallel streams.**
 
-Launch independent streams (depends_on: []) in parallel using Task tool with worktree isolation:
+Launch independent streams (depends_on: []) in parallel using Task tool with worktree isolation.
+
+> From agency-agents (msitarzewski/agency-agents, 50.8k★): "Structured handoff docs prevent the #1 multi-agent failure: context loss between agents."
+
+Each stream receives a **NEXUS Handoff Template** — not a bare prompt:
 
 ```
 For each stream where depends_on == []:
@@ -160,8 +164,43 @@ For each stream where depends_on == []:
     subagent_type: "general-purpose",
     model: "sonnet",
     isolation: "worktree",
-    prompt: "Cook task: [stream.task]. Files in scope: [stream.files]. Return cook report on completion."
+    prompt: <NEXUS Handoff below>
   )
+```
+
+**NEXUS Handoff Template** (sent to each cook instance):
+
+```markdown
+## NEXUS Handoff: Stream [id]
+
+### Metadata
+- Stream: [id] of [total]
+- Depends on: [none | stream ids]
+- File ownership: [list — ONLY these files may be modified]
+- Model: sonnet
+
+### Context
+- Project: [project name and type]
+- Overall goal: [1-line feature description]
+- This stream's goal: [specific sub-task]
+- Conventions: [key patterns from scout — naming, file structure, test framework]
+
+### Deliverable
+- [ ] [specific outcome 1 — e.g., "AuthService with login/register/reset methods"]
+- [ ] [specific outcome 2 — e.g., "Unit tests covering happy path + 3 error cases"]
+- [ ] [specific outcome 3 — e.g., "Types exported for Phase 2 consumers"]
+
+### Quality Expectations
+- Tests: must pass with evidence (stdout captured)
+- Types: no `any`, strict mode
+- Security: no hardcoded secrets, parameterized queries
+- Conventions: [project-specific — from scout output]
+
+### Evidence Required
+Return a Cook Report with:
+- Exact files modified (git diff --stat)
+- Test output (stdout — not just "tests pass")
+- Any CONCERNS discovered during implementation
 ```
 
 **2b. Launch dependent streams sequentially.**
@@ -169,13 +208,10 @@ For each stream where depends_on == []:
 ```
 For each stream where depends_on != []:
   WAIT for all depends_on streams to complete.
-  Then launch:
-  Task(
-    subagent_type: "general-purpose",
-    model: "sonnet",
-    isolation: "worktree",
-    prompt: "Cook task: [stream.task]. Files in scope: [stream.files]. Patterns from stream [depends_on] are available in worktree. Return cook report."
-  )
+  Then launch with NEXUS Handoff that includes:
+  - Completed stream's deliverables as "Available Context"
+  - Exported interfaces/types from prior streams in "Code Contracts" section
+  - Any CONCERNS from prior streams in "Known Issues" section
 ```
 
 **2b.5. Pre-merge scope verification.**
@@ -367,16 +403,24 @@ Mark todo[4] `completed`.
 - **Duration**: [time across streams]
 
 ### Streams
-| Stream | Task | Status | Cook Report |
-|--------|------|--------|-------------|
-| A | [task] | complete | [summary] |
-| B | [task] | complete | [summary] |
-| C | [task] | complete | [summary] |
+| Stream | Task | Status | Deliverables | Concerns |
+|--------|------|--------|-------------|----------|
+| A | [task] | DONE | 3/3 delivered | None |
+| B | [task] | DONE_WITH_CONCERNS | 2/2 delivered | Perf regression on large input |
+| C | [task] | DONE | 2/2 delivered | None |
+
+### Acceptance Criteria
+| # | Criterion | Stream | Evidence | Verdict |
+|---|-----------|--------|----------|---------|
+| 1 | Auth endpoints return JWT | A | Test stdout: "3 passed" | PASS |
+| 2 | No SQL injection | A | Sentinel: PASS | PASS |
+| 3 | Dashboard loads < 2s | B | No perf test run | UNVERIFIED |
 
 ### Integration
 - Merge conflicts: [count]
 - Integration tests: [passed]/[total]
 - Coverage: [%]
+- Unresolved concerns: [count — from DONE_WITH_CONCERNS streams]
 ```
 
 ---
@@ -405,6 +449,8 @@ Known failure modes for this skill. Check these before declaring done.
 | Agent modified files outside declared scope | HIGH | Pre-merge scope verification in Phase 2b.5 — flag before merge, not after |
 | Merge failure with no rollback path | HIGH | pre-team-merge tag created before merges — git reset --hard on failure |
 | Poisoned cook report merged blindly | HIGH | Phase 3a.5 integrity-check on all cook reports before merge |
+| Bare prompt to cook instance — no context, conventions, or scope boundary | HIGH | NEXUS Handoff Template: structured handoff with metadata, deliverables, quality expectations, and evidence requirements |
+| Cook returns "done" with no acceptance criteria tracking | MEDIUM | Team Report includes Acceptance Criteria table with per-criterion evidence and PASS/FAIL/UNVERIFIED verdict |
 
 ## Done When
 

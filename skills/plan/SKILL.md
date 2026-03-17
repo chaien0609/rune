@@ -3,7 +3,7 @@ name: plan
 description: Create structured implementation plans from requirements. Produces master plan + phase files for enterprise-scale project management. Master plan = overview (<80 lines). Phase files = execution detail (<150 lines each). Each session handles 1 phase. Uses opus for deep reasoning.
 metadata:
   author: runedev
-  version: "0.5.0"
+  version: "0.6.0"
   layer: L2
   model: opus
   group: creation
@@ -227,6 +227,52 @@ Save to `.rune/plan-<feature>.md`:
 ```
 
 **Max 80 lines.** No implementation details — that's what phase files are for.
+
+### Step 4.5 — Workflow Registry (Complex Features Only)
+
+> From agency-agents (msitarzewski/agency-agents, 50.8k★): "Every route is an entry point. Every worker is a workflow. If it's missing from the registry, it doesn't exist."
+
+For complex features (4+ phases OR 3+ user-facing workflows), build a **4-view Workflow Registry** before writing phase files. This catches missing pieces, dead ends, and integration gaps at plan time — not implementation time.
+
+**Skip conditions**: trivial tasks, inline plans, single-workflow features.
+
+**4 cross-referenced views:**
+
+```markdown
+## Workflow Registry
+
+### View 1: By Workflow
+| Workflow | Entry Point | Components Touched | Exit Point | Phase |
+|----------|-------------|-------------------|------------|-------|
+| User signup | POST /auth/register | AuthService, UserRepo, EmailService | 201 + email sent | Phase 1 |
+| Password reset | POST /auth/reset | AuthService, EmailService, TokenRepo | 200 + reset email | Phase 2 |
+
+### View 2: By Component
+| Component | Used By Workflows | Owner Phase | Status |
+|-----------|-------------------|-------------|--------|
+| AuthService | signup, login, reset | Phase 1 | Planned |
+| EmailService | signup, reset, invite | Phase 2 | Planned |
+| TokenRepo | reset, invite | Phase 2 | Missing ← RED FLAG |
+
+### View 3: By User Journey
+| Journey | Steps (workflow chain) | Happy Path | Error Path |
+|---------|----------------------|------------|------------|
+| New user → first action | signup → verify email → login → onboard | 4 steps | signup fail, email bounce |
+
+### View 4: By State
+| Step | User Sees | DB State | Logs | Operator Sees |
+|------|-----------|----------|------|---------------|
+| After signup | "Check your email" | user.status=pending | user.created event | New user in admin |
+| After verify | Dashboard | user.status=active | user.verified event | Active user count +1 |
+```
+
+**Validation rules:**
+- Every component in View 2 MUST appear in at least one workflow in View 1 — orphaned components = dead code
+- Every workflow in View 1 MUST map to a phase — unphased workflows will be forgotten
+- "Missing" status in View 2 = **red flag** — component needed but not planned in any phase → add to a phase or create new phase
+- Every user journey step in View 3 MUST have a corresponding state row in View 4
+
+**Output**: Add the registry to the master plan file (it fits within the 80-line budget when tables are compact). Phase files reference it but don't duplicate it.
 
 ### Step 5 — Write Phase Files
 
@@ -562,6 +608,7 @@ Max 200 lines. Self-contained — coder needs ONLY this file.
 | Horizontal layer planning (all models → all APIs → all UI) | HIGH | Vertical slices parallelize better. Use wave-based grouping: independent tasks in same wave, dependent tasks in later waves |
 | Tasks without `depends_on` in Wave 2+ | MEDIUM | Implicit dependencies break parallel dispatch. Every Wave 2+ task MUST declare `depends_on` |
 | Plan ignores locked Decisions from BA | CRITICAL | Decision Compliance section cross-checks requirements.md — locked decisions are non-negotiable |
+| Complex feature missing Workflow Registry — components planned but never wired | HIGH | Step 4.5: 4-view registry catches orphaned components, unphased workflows, and missing state transitions before phase files are written |
 
 ## Done When
 

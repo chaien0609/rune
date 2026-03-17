@@ -4,7 +4,7 @@ description: "Validates agent claims against evidence trail. Catches 'done' with
 user-invocable: false
 metadata:
   author: runedev
-  version: "1.3.0"
+  version: "1.4.0"
   layer: L3
   model: haiku
   group: validation
@@ -87,7 +87,15 @@ For each claim, look for corresponding evidence in the conversation context:
 | "no security issues" | Sentinel report with PASS verdict | Sentinel skill output |
 | "coverage ≥ X%" | Coverage tool output with actual percentage | Test runner with coverage flag |
 
-### Step 3 — Validate Each Claim
+### Step 3 — Validate Each Claim (Default-FAIL Mindset)
+
+<HARD-GATE>
+Default posture is FAIL, not PASS. Actively seek 3-5 issues per review.
+Zero issues found = red flag — look harder, not a sign of quality.
+This prevents rubber-stamping where the gate confirms everything without scrutiny.
+</HARD-GATE>
+
+> Source: msitarzewski/agency-agents (50.8k★) — "Default to finding 3-5 issues. Zero issues = red flag, look harder."
 
 For each claim + evidence pair:
 
@@ -99,6 +107,12 @@ IF evidence exists BUT contradicts claim:
 IF no evidence found:
   → UNCONFIRMED (agent may be right but didn't prove it)
 ```
+
+**Adversarial validation checklist** (run AFTER initial verdicts):
+1. Re-read each CONFIRMED claim — is the evidence actually proving THIS claim, or a different one?
+2. Check for **partial completion** — did the agent do 80% but claim 100%? (e.g., "implemented feature" but only the happy path)
+3. Check for **scope mismatch** — does the evidence prove the SPECIFIC claim or a broader/narrower version?
+4. If all claims are CONFIRMED on first pass, apply **skeptic sweep**: re-examine the weakest 2 claims with heightened scrutiny
 
 ### Step 4 — Report
 
@@ -200,6 +214,8 @@ Completion Gate Report with status (CONFIRMED/UNCONFIRMED/CONTRADICTED), claim v
 | Existence Theater — agent creates files but they're stubs | HIGH | Step 1b stub detection: grep for Placeholder/TODO/NotImplementedError in new files |
 | Cross-phase integration gaps — exports exist but wrong signature | HIGH | Step 4.5: verify exports match Code Contracts from phase file |
 | Phase complete but E2E flow broken — missing link in the chain | MEDIUM | Step 4.5 E2E flow trace: entry → logic → data → response must all be connected |
+| Rubber-stamping — all CONFIRMED without scrutiny | HIGH | Default-FAIL mindset: actively seek 3-5 issues. Zero issues = red flag, apply skeptic sweep on weakest 2 claims |
+| Partial completion claimed as full — 80% done but "implemented" | HIGH | Adversarial checklist: check for partial completion, scope mismatch, evidence-claim alignment |
 
 ## Done When
 

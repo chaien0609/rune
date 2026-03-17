@@ -3,7 +3,7 @@ name: ba
 description: Business Analyst agent. Deeply understands user requirements before any planning or coding begins. Asks probing questions, identifies hidden requirements, maps stakeholders, defines scope boundaries, and produces a structured Requirements Document that plan and cook consume.
 metadata:
   author: runedev
-  version: "0.2.0"
+  version: "0.3.0"
   layer: L2
   model: opus
   group: creation
@@ -84,6 +84,32 @@ If user says "just build it" → respond with: "I'll build it better with 2 minu
 Each question must be asked separately, wait for answer before next.
 Exception: if user provides a detailed spec/PRD → extract answers from it, confirm with user.
 </HARD-GATE>
+
+#### Structured Elicitation Frameworks
+
+Choose the framework that fits the requirement type. Use it to STRUCTURE the 5 Questions above, not replace them.
+
+| Framework | When to Use | Structure |
+|-----------|------------|-----------|
+| **PICO** | Clinical, research, data-driven, or A/B testing features | **P**opulation (who), **I**ntervention (what change), **C**omparison (vs what), **O**utcome (measurable result) |
+| **INVEST** | User stories for sprint-sized features | **I**ndependent, **N**egotiable, **V**aluable, **E**stimable, **S**mall, **T**estable |
+| **Jobs-to-be-Done** | Product features, user workflows | "When [situation], I want to [motivation] so I can [expected outcome]" |
+
+> Source: K-Dense claude-scientific-skills (literature-review PICO pattern), adapted for software BA.
+
+**PICO Example (data feature):**
+```
+P: Dashboard users monitoring real-time metrics
+I: Add anomaly detection alerts
+C: vs. current manual threshold setting
+O: 30% faster incident detection (measurable KPI)
+```
+
+**When to apply which:**
+- Feature Request → INVEST (ensures stories are sprint-ready)
+- Data/Analytics/Research feature → PICO (forces measurable outcome definition)
+- Product/UX feature → Jobs-to-be-Done (keeps focus on user motivation)
+- Integration → 5 Questions only (frameworks add noise for plumbing tasks)
 
 ### Step 3 — Hidden Requirement Discovery
 

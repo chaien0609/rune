@@ -3,7 +3,7 @@ name: plan
 description: Create structured implementation plans from requirements. Produces master plan + phase files for enterprise-scale project management. Master plan = overview (<80 lines). Phase files = execution detail (<150 lines each). Each session handles 1 phase. Uses opus for deep reasoning.
 metadata:
   author: runedev
-  version: "0.7.0"
+  version: "0.8.0"
   layer: L2
   model: opus
   group: creation
@@ -336,6 +336,7 @@ function validateInput(raw: unknown): TradeEntry[];  // throws ValidationError
 Each task MUST include: **File** (exact path), **Test** (test file or N/A), **Verify** (shell command), **Commit** (semantic message). Granularity: 2-5 min per task. If >10min, decompose.
 
 - [ ] Task 1 — Create calculateProfit function
+  - Req: REQ-001 (P&L calculation)
   - File: `src/foo/bar.ts` (new)
   - Test: `tests/foo/bar.test.ts` (new)
   - Verify: `npm test -- --grep "calculateProfit"`
@@ -343,12 +344,14 @@ Each task MUST include: **File** (exact path), **Test** (test file or N/A), **Ve
   - Logic: sum entries by side, apply fees (0.1% per trade), return net P&L
   - Edge: empty array → return { netPnL: 0, totalFees: 0, winRate: 0 }
 - [ ] Task 2 — Add input validation
+  - Req: REQ-002 (input validation)
   - File: `src/foo/baz.ts` (modify)
   - Test: `tests/foo/baz.test.ts` (new)
   - Verify: `npm test -- --grep "validateInput"`
   - Commit: `feat(trading): add input validation for trade entries`
   - Logic: check side is 'long'|'short', prices > 0, quantity > 0
 - [ ] Task 3 — Write integration tests
+  - Req: REQ-001, REQ-002 (integration coverage)
   - File: `tests/foo/bar.test.ts` (modify)
   - Test: N/A — this IS the test task
   - Verify: `npm test -- --grep "trading" && npx tsc --noEmit`
@@ -397,6 +400,14 @@ Each task MUST include: **File** (exact path), **Test** (test file or N/A), **Ve
 - [ ] Performance: calculateProfit(10K entries) < 100ms
 - [ ] No `any` types, no mutation, no `toFixed()` for money
 
+## Traceability Matrix
+| Req ID | Requirement | Task(s) | Test(s) | Status |
+|--------|-------------|---------|---------|--------|
+| REQ-001 | P&L calculation with fees | Task 1 | `tests/foo/bar.test.ts` | ⬚ |
+| REQ-002 | Input validation | Task 2 | `tests/foo/baz.test.ts` | ⬚ |
+
+Every requirement from BA's Requirements Document MUST appear in this matrix. Missing requirement = incomplete phase. `completion-gate` checks this matrix during verification.
+
 ## Files Touched
 - `src/foo/bar.ts` — new
 - `src/foo/baz.ts` — modify
@@ -415,6 +426,7 @@ Every phase file MUST include ALL of these sections (Amateur-Proof Checklist):
 6. ✅ Cross-Phase Context — what's assumed from prior phases, what's exported for future phases
 7. ✅ Acceptance Criteria — testable, includes performance if applicable
 8. ✅ Test tasks — every code task has corresponding tests
+9. ✅ Traceability Matrix — every BA requirement mapped to tasks and tests (skip if no BA requirements exist)
 
 A phase missing ANY of sections 1-7 is INCOMPLETE — the weakest coder will guess wrong.
 Performance Constraints section is optional (only when NFRs apply).
@@ -634,6 +646,7 @@ SELF-VALIDATION (run before presenting plan to user):
 - [ ] Every code-producing phase has at least one test task
 - [ ] Phase files have ALL Amateur-Proof sections (data flow, code contracts, failure scenarios, rejection criteria)
 - [ ] Locked decisions from BA are reflected in plan — none contradicted or ignored
+- [ ] Every BA requirement has a corresponding Req ID in at least one phase's Traceability Matrix
 ```
 
 ## Done When

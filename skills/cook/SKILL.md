@@ -5,7 +5,7 @@ context: fork
 agent: general-purpose
 metadata:
   author: runedev
-  version: "1.1.0"
+  version: "1.2.0"
   layer: L1
   model: sonnet
   group: orchestrator
@@ -247,6 +247,55 @@ This phase is lightweight — a Read + pattern match, not a full scan. It does N
 7. Mark Phase 2 as `completed`
 
 **Gate**: User MUST approve the plan before proceeding. Do NOT skip this.
+
+### Phase 2.5: RFC GATE (Breaking Changes Only)
+
+**Goal**: Formal change management for breaking changes. Prevents unreviewed breaking changes from reaching production.
+
+**Auto-trigger conditions** (ANY triggers this gate):
+- Plan includes `BREAKING CHANGE` annotation
+- Plan modifies a public API signature (added/removed/changed parameters)
+- Plan alters database schema (migration required)
+- Plan removes or renames an exported function/type used by other modules
+- Plan changes authentication/authorization flow
+
+**Skip conditions**: Non-breaking changes, internal refactors, new features with no API surface change.
+
+**RFC Artifact** (`.rune/rfc/RFC-<NNN>-<slug>.md`):
+
+```markdown
+# RFC-<NNN>: <Title>
+
+**Date**: [YYYY-MM-DD]
+**Author**: [agent or user]
+**Status**: Proposed | Approved | Rejected
+**Impact**: [list affected consumers — modules, services, users]
+
+## What Changes
+[Specific breaking change — old behavior → new behavior]
+
+## Why
+[Business/technical justification — why breaking is necessary]
+
+## Migration Path
+[Step-by-step guide for consumers to adapt]
+[Include code examples: before → after]
+
+## Rollback Plan
+[How to revert if the change causes issues]
+
+## Affected Systems
+| System | Impact | Migration Effort |
+|--------|--------|-----------------|
+| [module/service] | [description] | [low/medium/high] |
+```
+
+**Gate**: RFC MUST be written and presented to user for approval. User responds: "approved" → proceed. "rejected" → revise plan. "deferred" → skip breaking change, implement non-breaking alternative.
+
+<HARD-GATE>
+Breaking change without RFC = BLOCKED. No exceptions.
+"It's just a small change" is the #1 excuse for production incidents from unreviewed breaking changes.
+</HARD-GATE>
 
 ## Phase 2.5: ADVERSARY (Red-Team Challenge)
 
@@ -874,6 +923,7 @@ Known failure modes for this skill. Check these before declaring done.
 | Treating user "stop"/"cancel" as scope change | CRITICAL | Mid-Run Signal Detection: Cancel/Pause are safety signals with absolute priority — never reinterpret as Steer or NewTask |
 | Same tool+args+result called 3+ times without progress | HIGH | Hash-Based Loop Detection: 3x warn, 5x force stop. Only same-input-AND-same-output counts — retries with different results are fine |
 | Ignoring mid-run user messages during autonomous execution | HIGH | Two-stage intent classification: keyword fast-path for simple signals, context classification for longer messages. Never queue user messages — process immediately |
+| Breaking change shipped without RFC review | CRITICAL | Phase 2.5 RFC Gate: any breaking change MUST have RFC artifact + user approval before implementation |
 
 ## Self-Validation
 

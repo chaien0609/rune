@@ -3,7 +3,7 @@ name: test
 description: "TDD test writer. Writes failing tests FIRST (red), then verifies they pass after implementation (green). Covers unit, integration, and e2e tests."
 metadata:
   author: runedev
-  version: "0.6.0"
+  version: "0.7.0"
   layer: L2
   model: sonnet
   group: development
@@ -208,14 +208,14 @@ For non-trivial features (3+ test files or 20+ test cases), create a `TEST.md` i
 - `test_e2e.py`: ~XX E2E tests planned (L3/L4)
 
 ## Unit Test Plan (L1)
-| Module | Functions | Edge Cases | Est. Tests |
-|--------|-----------|------------|------------|
-| `core/auth.py` | login, register, refresh | expired token, invalid creds, rate limit | 12 |
+| Module | Functions | Edge Cases | Est. Tests | Req IDs |
+|--------|-----------|------------|------------|---------|
+| `core/auth.py` | login, register, refresh | expired token, invalid creds, rate limit | 12 | REQ-001, REQ-003 |
 
 ## E2E Scenarios (L3/L4)
-| Workflow | Simulates | Operations | Verified |
-|----------|-----------|------------|----------|
-| User signup | New user onboarding | register → verify → login | Token valid, profile created |
+| Workflow | Simulates | Operations | Verified | Req IDs |
+|----------|-----------|------------|----------|---------|
+| User signup | New user onboarding | register → verify → login | Token valid, profile created | REQ-005 |
 
 ## Realistic Workflow Scenarios
 - **[Name]**: [Step 1] → [Step 2] → verify [output properties]
@@ -229,6 +229,12 @@ For non-trivial features (3+ test files or 20+ test cases), create a `TEST.md` i
 ## Summary
 - Total: XX | Passed: XX | Failed: 0
 - Execution time: X.Xs | Coverage: XX%
+
+## Requirement Coverage
+| Req ID | Test File(s) | Status |
+|--------|-------------|--------|
+| REQ-001 | `test_auth.py::test_login` | ✅ Covered |
+| REQ-002 | — | ❌ Not covered |
 
 ## Gaps
 - [Areas not covered and why]
@@ -403,6 +409,7 @@ SELF-VALIDATION (run before emitting Test Report):
 - [ ] No test modifies source code — test files only, source changes belong to fix
 - [ ] Test names describe behavior, not implementation ("should reject expired token" not "test function X")
 - [ ] No mocks of the thing being tested — only mock external dependencies
+- [ ] If BA requirements exist (REQ-xxx), every requirement has at least one test — check plan's Traceability Matrix
 ```
 
 ## Done When

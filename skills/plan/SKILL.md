@@ -3,7 +3,7 @@ name: plan
 description: Create structured implementation plans from requirements. Produces master plan + phase files for enterprise-scale project management. Master plan = overview (<80 lines). Phase files = execution detail (<150 lines each). Each session handles 1 phase. Uses opus for deep reasoning.
 metadata:
   author: runedev
-  version: "0.8.0"
+  version: "0.9.0"
   layer: L2
   model: opus
   group: creation
@@ -432,12 +432,30 @@ A phase missing ANY of sections 1-7 is INCOMPLETE — the weakest coder will gue
 Performance Constraints section is optional (only when NFRs apply).
 </HARD-GATE>
 
+### Step 5.5 — Completeness Scoring (Alternatives)
+
+When presenting alternative approaches (from brainstorm or Step 3 decisions), rate each with **Completeness X/10**:
+
+| Score | Meaning |
+|-------|---------|
+| 9-10 | Complete — all edge cases, full coverage, production-ready |
+| 7-8 | Happy path covered, some edges skipped |
+| 4-6 | Shortcut — defers significant work |
+| 1-3 | Minimal viable, debt guaranteed |
+
+**Always recommend higher-completeness option.** With AI-assisted coding, the marginal cost of completeness is near-zero. Show dual effort estimates for each approach: `(human: ~X / AI: ~Y)`.
+
+**Anti-pattern**: "Option B saves 70 LOC" → 70 LOC delta is meaningless with AI. Choose complete. The last 10% of coverage is where production bugs hide.
+
+> Source: garrytan/gstack v0.9.0 — "Boil the Lake" principle.
+
 ### Step 6 — Present and Get Approval
 
 Present the **master plan** to user (NOT all phase files). User reviews:
 - Phase breakdown
 - Key decisions
 - Risks
+- Completeness scores for chosen approach (from Step 5.5)
 
 Wait for explicit approval ("go", "proceed", "yes") before writing phase files.
 
@@ -636,6 +654,7 @@ Max 200 lines. Self-contained — coder needs ONLY this file.
 | Tasks without `depends_on` in Wave 2+ | MEDIUM | Implicit dependencies break parallel dispatch. Every Wave 2+ task MUST declare `depends_on` |
 | Plan ignores locked Decisions from BA | CRITICAL | Decision Compliance section cross-checks requirements.md — locked decisions are non-negotiable |
 | Complex feature missing Workflow Registry — components planned but never wired | HIGH | Step 4.5: 4-view registry catches orphaned components, unphased workflows, and missing state transitions before phase files are written |
+| Recommending shortcut approach without Completeness Score | MEDIUM | Step 5.5: every alternative needs X/10 Completeness score + dual effort estimate (human vs AI). "Saves 70 LOC" is not a reason when AI makes the delta cost minutes |
 
 ## Self-Validation
 

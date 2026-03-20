@@ -3,7 +3,7 @@ name: ba
 description: Business Analyst agent. Deeply understands user requirements before any planning or coding begins. Asks probing questions, identifies hidden requirements, maps stakeholders, defines scope boundaries, and produces a structured Requirements Document that plan and cook consume.
 metadata:
   author: runedev
-  version: "0.3.0"
+  version: "0.4.0"
   layer: L2
   model: opus
   group: creation
@@ -133,6 +133,32 @@ After the 5 questions, analyze for requirements the user DIDN'T mention:
 - Regulatory/compliance needs? (GDPR, PCI, HIPAA)
 
 Present discovered hidden requirements to user: "I found N additional requirements you may not have considered: [list]. Which are relevant?"
+
+### Step 3.5 — Completeness Scoring (Options & Alternatives)
+
+When presenting options, alternatives, or scope decisions to the user, rate each with a **Completeness score (X/10)**:
+
+| Score | Meaning | Guidance |
+|-------|---------|----------|
+| 9-10 | Complete — all edge cases, full coverage, production-ready | Always recommend |
+| 7-8 | Covers happy path, skips some edges | Acceptable for MVP |
+| 4-6 | Shortcut — defers significant work to later | Flag trade-off explicitly |
+| 1-3 | Minimal viable, technical debt guaranteed | Only for time-critical emergencies |
+
+**Always recommend the higher-completeness option** unless the delta is truly expensive. With AI-assisted coding, the marginal cost of completeness is near-zero:
+
+| Task Type | Human Team | AI-Assisted | Compression |
+|-----------|-----------|-------------|-------------|
+| Boilerplate / scaffolding | 2 days | 15 min | ~100x |
+| Test writing | 1 day | 15 min | ~50x |
+| Feature implementation | 1 week | 30 min | ~30x |
+| Bug fix + regression test | 4 hours | 15 min | ~20x |
+
+**When showing effort estimates**, always show both scales: `(human: ~X / AI: ~Y)`. The compression ratio reframes "too expensive" into "15 minutes more."
+
+**Anti-pattern**: "Choose B — it covers 90% of the value with less code." → If A is only 70 lines more, choose A. The last 10% is where production bugs hide.
+
+> Source: garrytan/gstack v0.9.0 — "Boil the Lake" principle. Completeness is cheap when AI makes the marginal cost near-zero.
 
 ### Step 4 — Scope Definition
 
@@ -298,6 +324,7 @@ Known failure modes for this skill. Check these before declaring done.
 | Missing hidden requirements (auth, error handling, edge cases) | HIGH | Step 3 checklist is mandatory scan |
 | Requirements doc too verbose (>500 lines) | MEDIUM | Max 200 lines — concise, actionable, testable |
 | Skipping BA for "simple" features that turn out complex | HIGH | Let cook's complexity detection trigger BA, not user judgment |
+| Recommending shortcuts without Completeness Score | MEDIUM | Step 3.5: every option needs X/10 score + dual effort estimate (human vs AI). "90% coverage" is a red flag when 100% costs 15 min more |
 
 ## Done When
 

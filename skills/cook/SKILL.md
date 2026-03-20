@@ -5,7 +5,7 @@ context: fork
 agent: general-purpose
 metadata:
   author: runedev
-  version: "1.2.0"
+  version: "1.3.0"
   layer: L1
   model: sonnet
   group: orchestrator
@@ -395,6 +395,8 @@ If the coder model needs info from other phases, it's in the Cross-Phase Context
      - Prefer `asyncio.gather()` for parallel I/O operations
      - Use `asyncio.TaskGroup` (Python 3.11+) for structured concurrency
 4. If stuck on unexpected errors → invoke `rune:debug` (max 3 debug↔fix loops)
+   - Debug will scope-lock to the affected directory (Step 1.5) — fix recommendations stay within boundary
+   - If debug recommends changes outside plan scope → treat as R4 deviation (ASK user first)
 5. **Re-plan check** — before proceeding to Phase 5, evaluate:
    - Did debug-fix loops hit max (3) for any area? → trigger re-plan
    - Were files modified outside the approved plan scope? → trigger re-plan
@@ -669,6 +671,8 @@ MAX_DEBUG_LOOPS:   3 per error area (already enforced)
 MAX_QUALITY_LOOPS: 2 re-runs of Phase 5 (fix→recheck cycle)
 MAX_REPLAN:        1 re-plan per cook session (Phase 4 re-plan check)
 MAX_PIVOT:         1 approach pivot per cook session (Approach Pivot Gate)
+MAX_FIXES:         30 per session (hard cap — fix's WTF-likelihood self-regulation)
+WTF_THRESHOLD:     20% quality decay risk → STOP fixing, commit progress, re-assess
 TIMEOUT_SIGNAL:    If context-watch reports ORANGE, wrap up current phase and checkpoint
 ```
 
@@ -924,6 +928,7 @@ Known failure modes for this skill. Check these before declaring done.
 | Same tool+args+result called 3+ times without progress | HIGH | Hash-Based Loop Detection: 3x warn, 5x force stop. Only same-input-AND-same-output counts — retries with different results are fine |
 | Ignoring mid-run user messages during autonomous execution | HIGH | Two-stage intent classification: keyword fast-path for simple signals, context classification for longer messages. Never queue user messages — process immediately |
 | Breaking change shipped without RFC review | CRITICAL | Phase 2.5 RFC Gate: any breaking change MUST have RFC artifact + user approval before implementation |
+| Runaway fix loop — fix introduces more bugs than it resolves | HIGH | fix v0.5.0 WTF-likelihood self-regulation: >20% decay = STOP. Hard cap 30 fixes/session via MAX_FIXES exit condition. Regressions +15%, blast radius +5%/file |
 
 ## Self-Validation
 

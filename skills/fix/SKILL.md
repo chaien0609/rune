@@ -3,7 +3,7 @@ name: fix
 description: Apply code changes and fixes. Writes implementation code, applies bug fixes, and verifies changes with tests. Core action hub in the development mesh.
 metadata:
   author: runedev
-  version: "0.4.0"
+  version: "0.5.0"
   layer: L2
   model: sonnet
   group: development
@@ -96,6 +96,32 @@ Confirm the change works and nothing is broken.
   - Do NOT change test files to make tests pass — fix the implementation code
 - If project has a type-check command, run it via `Bash`
 - If project has a lint command, run it via `Bash`
+
+### Step 4.5: Quality Decay Check (Self-Regulation)
+
+When fix is called repeatedly (e.g., by cook Phase 4, or iterative fix loops), track a **WTF-likelihood score** — the probability that continued fixing is making things worse.
+
+**Compute every 3 fix attempts** (or when called 5+ times in a single cook session):
+
+| Signal | Score Adjustment |
+|--------|-----------------|
+| A fix was reverted (any test that passed now fails) | +15% |
+| Fix touched >3 files (blast radius expanding) | +5% per extra file beyond 3 |
+| 15+ fixes already applied in this session | +1% per fix beyond 15 |
+| All remaining issues are LOW severity | +10% |
+| Fix touched files outside the original diagnosis scope | +20% |
+| Consecutive fixes without running tests between them | +10% |
+
+**Thresholds:**
+- **>20% WTF-likelihood**: STOP fixing. Report current state to cook/user with: "Quality decay detected — continued fixes risk introducing more bugs than they resolve. {N} fixes applied, {score}% risk. Recommend: commit current progress, re-assess remaining issues."
+- **Hard cap: 30 fixes per session** — regardless of score. After 30, STOP and report.
+
+**Reset conditions:** WTF-likelihood resets to 0% when:
+- User explicitly says "continue fixing"
+- A full test suite run shows zero regressions
+- Scope is narrowed to a single file
+
+> Source: garrytan/gstack v0.9.0 (qa skill) — prevents runaway fix loops where each fix introduces new risk.
 
 ### Step 5: Post-Fix Hardening (Defense-in-Depth)
 
@@ -207,6 +233,7 @@ Known failure modes for this skill. Check these before declaring done.
 | Fixing at crash site without tracing data origin | HIGH | Defense-in-depth: trace where bad data ORIGINATES, add validation at every layer it passes through |
 | Single-point validation (fix one spot, hope it holds) | MEDIUM | Step 5: add entry + business logic + environment + debug layers for data-flow bugs |
 | Removing debug instrumentation before fix is verified | MEDIUM | Step 5b: preserve `#region agent-debug` markers until all tests pass — premature cleanup erases failure history |
+| Runaway fix loop — 20+ fixes without checking quality decay | HIGH | Step 4.5: WTF-likelihood self-regulation. >20% risk = STOP. Hard cap 30 fixes/session. Each fix adds risk — diminishing returns after ~15 |
 
 ## Done When
 

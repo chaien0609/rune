@@ -3,7 +3,7 @@ name: debug
 description: Root cause analysis for bugs and unexpected behavior. Traces errors through code, uses structured reasoning, and hands off to fix when cause is found. Core of the debug↔fix mesh.
 metadata:
   author: runedev
-  version: "0.6.0"
+  version: "0.7.0"
   layer: L2
   model: sonnet
   group: development
@@ -66,6 +66,24 @@ Understand and confirm the error described in the request.
 - Identify which environment it occurs in (dev/prod, browser/server)
 - Confirm the error is consistent and reproducible before proceeding
 - If no reproduction steps provided, ask for them or attempt the most likely path
+
+### Step 1.5: Scope Lock (Edit Boundary)
+
+After reproducing the error, **lock edits to the narrowest affected directory** to prevent debug-driven scope creep — the #1 source of "while I'm here, let me also fix..." violations.
+
+1. Identify the narrowest directory containing the affected files (from stack trace or error location)
+2. Announce to user: "Debug scope locked to `<dir>/`. Changes will be restricted to this area."
+3. Any fix recommendation in the Debug Report MUST reference only files within this boundary
+4. If root cause traces outside the boundary → expand scope with user confirmation first
+
+**Skip conditions** (do NOT lock):
+- Bug spans the entire repo (3+ unrelated directories in stack trace)
+- Cannot determine affected area from initial evidence
+- User explicitly says "investigate everything"
+
+**Why:** Debugging naturally expands scope as you trace root causes. Without a boundary, rune:fix receives recommendations touching 10+ files across unrelated modules. The scope lock forces discipline: fix at the source, not at every symptom site.
+
+> Source: garrytan/gstack v0.9.0 (investigate skill) — auto-freeze to affected module during debug sessions.
 
 ### Step 2: Gather Evidence
 
@@ -328,6 +346,8 @@ ALL of these mean: STOP. Return to Step 2 (Gather Evidence).
 | Re-reading same file:line in different hypothesis cycles | HIGH | Hash-based evidence loop: if same evidence gathered 2x, form hypothesis from existing data — don't re-gather |
 | Same hypothesis category across cycles after RULED OUT | HIGH | Hypothesis category diversity: if "data" ruled out in cycle 1, cycle 2 must try "control flow", "environment", or "state" |
 | Running same test 3x with same failure without code change | MEDIUM | True stuck loop — no progress possible. Hand off to fix with current incomplete diagnosis |
+| Scope creep via debug — "while investigating, also fix X" | HIGH | Step 1.5 Scope Lock: lock edits to narrowest affected directory. Fix recommendations MUST stay within boundary. Expand only with user confirmation |
+| Debug report recommends touching 5+ unrelated files | HIGH | Symptom of fixing at crash sites instead of source. Backward trace (Step 2) to find origin. If truly 5+ files → likely architectural issue → escalate via 3-Fix Rule |
 
 ## Done When
 

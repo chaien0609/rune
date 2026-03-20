@@ -3,7 +3,7 @@ name: sentinel
 description: Automated security gatekeeper. Blocks unsafe code before commit — secret scanning, OWASP top 10, dependency audit, permission checks. A GATE, not a suggestion.
 metadata:
   author: runedev
-  version: "0.3.0"
+  version: "0.4.0"
   layer: L2
   model: sonnet
   group: quality
@@ -150,13 +150,42 @@ app.post('/users', async (req, res) => {
 });
 ```
 
-### Step 4 — Permission Check
-Use `Grep` to scan for:
+### Step 4 — Destructive Command Guard
+
+Scan for destructive operations in code AND detect real-time destructive commands during agent execution.
+
+**4a. Static scan** — Use `Grep` to scan changed files for:
 - Destructive shell commands in scripts: `rm -rf /`, `DROP TABLE`, `DELETE FROM` without `WHERE`, `TRUNCATE`
 - File operations using absolute paths outside the project root (e.g., `/etc/`, `/usr/`, `C:\Windows\`)
 - Direct production database connection strings (e.g., `prod`, `production` in DB host names)
 
 Destructive command on production path = **BLOCK**. Suspicious path = **WARN**.
+
+**4b. Real-Time Command Guard** (advisory for agent workflows)
+
+When sentinel is invoked by `cook` or `fix`, include this destructive command pattern table in the report. Any skill executing Bash commands SHOULD check against these patterns before execution:
+
+| Pattern | Risk | Action |
+|---------|------|--------|
+| `rm -rf` / `rm -r` / `rm --recursive` | Recursive delete | WARN — confirm target is expected |
+| `DROP TABLE` / `DROP DATABASE` / `TRUNCATE` | Data loss | BLOCK — require explicit confirmation |
+| `git push --force` / `git push -f` | History rewrite | WARN — confirm branch is correct |
+| `git reset --hard` | Uncommitted work loss | WARN — verify no unsaved changes |
+| `git checkout .` / `git restore .` | Working tree wipe | WARN — verify intent |
+| `kubectl delete` / `docker system prune` | Production impact | BLOCK — require namespace/context confirmation |
+| `chmod 777` / `chmod -R 777` | Permission escalation | WARN — almost never correct |
+
+**Safe exceptions** (do NOT warn):
+- `rm -rf node_modules`, `.next`, `dist`, `__pycache__`, `.cache`, `build`, `.turbo`, `coverage`, `target`
+- `git push --force-with-lease` (safe force push)
+- `docker rm` on explicitly named test containers
+
+**Composable modes** (future — advisory only for now):
+- **Careful mode**: warn before any destructive command (all patterns above)
+- **Freeze mode**: restrict file edits to a specific directory (scope lock)
+- **Guard mode**: careful + freeze combined
+
+> Source: garrytan/gstack v0.9.0 (careful/freeze/guard skills) — real-time command safety, composable with edit scope lock.
 
 ### Step 4.5 — Framework-Specific Security Patterns
 
@@ -380,6 +409,8 @@ BLOCKED — 2 critical findings must be resolved before commit.
 | Missing agentic security scan when .rune/ exists | HIGH | Step 4.7 is mandatory when .rune/ directory detected — never skip |
 | Domain hook too slow (>5s) → developers disable it | MEDIUM | Keep hooks fast — grep-based patterns only, no network calls. Complex validation goes in CI, not pre-commit |
 | Domain hook blocks on test fixtures / mock data | MEDIUM | Check file path context — `test/`, `fixtures/`, `__mocks__/` directories get relaxed rules |
+| Agent runs destructive command without checking pattern table | HIGH | Step 4b: real-time command guard patterns MUST be checked before Bash execution. Safe exceptions prevent false positives on `rm -rf node_modules` |
+| False positive on `rm -rf` in build cleanup scripts | MEDIUM | Safe exceptions list (node_modules, dist, .next, etc.) — build cleanup is NOT destructive |
 
 ## Done When
 

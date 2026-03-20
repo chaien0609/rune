@@ -75,11 +75,11 @@ skill-router — meta-enforcement layer, routes every action through the correct
 ### L1 Orchestrators (5)
 cook, team, launch, rescue, scaffold
 
-### L2 Workflow Hubs (27)
+### L2 Workflow Hubs (28)
 plan, scout, brainstorm, design, skill-forge, debug, fix, test, review, db,
 sentinel, preflight, onboard, deploy, marketing, perf,
 autopsy, safeguard, surgeon, audit, incident, review-intake, logic-guardian,
-ba, docs, mcp-builder, adversary
+ba, docs, mcp-builder, adversary, retro
 
 ### L3 Utilities (25)
 research, docs-seeker, trend-scout, problem-solver, sequential-thinking,

@@ -3,7 +3,7 @@ name: audit
 description: Comprehensive project audit — security, dependencies, code quality, architecture, performance, infra, docs, and mesh analytics. Delegates to specialist skills and generates an 8-dimension health score.
 metadata:
   author: runedev
-  version: "0.1.0"
+  version: "0.2.0"
   layer: L2
   model: sonnet
   group: quality
@@ -364,6 +364,36 @@ Use `Write` to save `AUDIT-REPORT.md` to the project root with the full findings
 
 Call `rune:journal` to record: audit date, overall health score, verdict, and CRITICAL count.
 
+## Weighted Composite Scoring
+
+Each dimension score feeds into a weighted composite formula that produces a single comparable health score. Use this formula to compute **Overall Health** — not a simple average.
+
+### Scoring Formula
+
+```
+Overall = (Security × 0.25) + (Code Quality × 0.20) + (Architecture × 0.15)
+        + (Dependencies × 0.15) + (Performance × 0.10) + (Infrastructure × 0.08)
+        + (Documentation × 0.07)
+```
+
+Mesh Analytics (Phase 8) is advisory — it contributes 0 to the weighted score but informs the verdict narrative.
+
+### Grade Thresholds
+
+| Score Range | Grade | Verdict | Action |
+|-------------|-------|---------|--------|
+| 90–100 | Excellent | PASS | Routine audit in 3 months |
+| 75–89 | Good | PASS | Address MEDIUM items next sprint |
+| 60–74 | Fair | WARNING | Fix HIGH items within 2 weeks |
+| 40–59 | Poor | FAIL | Fix CRITICAL + HIGH within 1 week |
+| 0–39 | Critical | FAIL | Emergency response — CRITICAL items block all new work |
+
+### Why Weighted (not average)
+
+Security issues cause exponential blast — a 3/10 security score with all other dimensions at 9/10 = overall 72 (Fair), not 8.1 (Good). The formula ensures security and code quality dominate the verdict. Comparable across runs: if Overall moves from 68 → 74 after fixes, the project measurably improved.
+
+> Source: zubair-trabzada/geo-seo-claude (2.7k★) — explicit weighted formula with 5-tier grade thresholds.
+
 ## Severity Levels
 
 ```
@@ -410,6 +440,10 @@ Apply confidence filtering: only report findings with >80% confidence. Consolida
 | Infrastructure | [n]    |
 | Documentation  | [n]    |
 | Mesh Analytics | [n]    |
+
+### Composite Score
+- **Formula**: (Security×0.25) + (Code Quality×0.20) + (Architecture×0.15) + (Dependencies×0.15) + (Performance×0.10) + (Infrastructure×0.08) + (Documentation×0.07)
+- **Weighted Score**: [computed value] → Grade: [Excellent/Good/Fair/Poor/Critical]
 
 ### Top Priority Actions
 1. [action] — [file:line] — [why it matters]

@@ -3,7 +3,7 @@ name: test
 description: "TDD test writer. Writes failing tests FIRST (red), then verifies they pass after implementation (green). Covers unit, integration, and e2e tests."
 metadata:
   author: runedev
-  version: "0.7.0"
+  version: "0.8.0"
   layer: L2
   model: sonnet
   group: development
@@ -241,6 +241,52 @@ For non-trivial features (3+ test files or 20+ test cases), create a `TEST.md` i
 ```
 
 **Why TEST.md**: Planning tests before code catches missing edge cases early. Appending results creates permanent evidence. One document = complete testing story.
+
+## Skill Behavior Tests (Eval Scenarios)
+
+For testing SKILL.md behavior (not code), use **Eval Scenarios** — unit tests for skill files, not code files.
+
+### Eval Scenario Format
+
+```markdown
+## Eval: E[NN] — [scenario name]
+
+### Prompt
+[The exact situation/message an agent receives]
+
+### Expected Reasoning
+[Step-by-step reasoning the agent SHOULD follow]
+
+### Must Include
+- [Assertion 1: what the output MUST contain or do]
+- [Assertion 2]
+
+### Must NOT
+- [Anti-pattern 1: what the output MUST NOT do]
+- [Anti-pattern 2]
+
+### Category
+happy-path | adversarial | edge-case | jailbreak | credential-leak
+```
+
+### Eval Coverage Requirements
+
+A skill is **behavior-tested** when it has evals covering:
+
+| Category | Min Evals | Purpose |
+|----------|-----------|---------|
+| Happy path | 1 | Core workflow executes correctly |
+| Edge case | 1 | Empty input, missing context, unusual state |
+| Adversarial | 1 | Time pressure, sunk cost, authority pressure |
+| Jailbreak / injection | 1 | Prompt injection attempt, "ignore instructions" |
+
+**Minimum**: 4 evals per skill (1 per category). Security-critical skills (sentinel, safeguard): 8+ evals.
+
+### Eval Storage
+
+Save eval files as `skills/<name>/evals.md`. Each eval is a numbered scenario (E01–E24 range). skill-forge Phase 7 checks for evals presence before ship.
+
+> Source: PhucMPham/zalo-agent-cli (35★) — 24 eval scenario format (E01-E24) with Must Include / Must NOT assertions.
 
 ## Error Recovery
 

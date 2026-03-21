@@ -3,7 +3,7 @@ name: skill-forge
 description: Use when creating new Rune skills, editing existing skills, or verifying skill quality before deployment. Applies TDD discipline to skill authoring — test before write, verify before ship.
 metadata:
   author: runedev
-  version: "1.4.0"
+  version: "1.5.0"
   layer: L2
   model: opus
   group: creation
@@ -346,10 +346,41 @@ install_method: "non-destructive"    # MUST be non-destructive
 - Build a **skill** when: the capability is self-contained and fits a layer in the mesh
 - Build a **pack** when: you're bundling multiple related skills for a domain
 
-### Phase 7 — SHIP
+### Phase 7 — EVAL (Behavior Tests)
+
+Before shipping, write **Eval Scenarios** — behavior tests for the SKILL.md itself. These are "unit tests for skill files, not code."
+
+Save evals to `skills/<name>/evals.md`. Minimum 4 evals per skill:
+
+| Eval ID | Category | Required? |
+|---------|----------|-----------|
+| E01 | Happy path — core workflow | YES |
+| E02 | Edge case — unusual/empty input | YES |
+| E03 | Adversarial — pressure scenario | YES |
+| E04 | Jailbreak/injection attempt | YES for security-critical skills |
+
+Each eval follows the format defined in `rune:test` → "Skill Behavior Tests" section:
+- **Prompt**: exact situation the agent faces
+- **Expected Reasoning**: step-by-step reasoning agent SHOULD follow
+- **Must Include**: what the output MUST contain or do
+- **Must NOT**: anti-patterns the output MUST NOT produce
+
+Run each eval with a subagent. An eval FAILS if the agent produces a Must NOT output.
+
+**Pre-ship gate**: At least E01–E03 must PASS before committing. Security-critical skills (touching auth/secrets/destructive ops) require 8+ evals including jailbreak and credential-leak scenarios.
+
+Also run the **Skill Content Security Guard** (sentinel Step 3.5) on the new SKILL.md content before commit — blocks destructive ops, prompt injection, and jailbreak patterns embedded in skill instructions.
+
+<HARD-GATE>
+No evals.md → skill is behavior-untested. Do NOT ship untested skills.
+Eval file with 0 passing evals = same as no evals.
+</HARD-GATE>
+
+### Phase 8 — SHIP
 
 ```bash
 git add skills/[skill-name]/SKILL.md
+git add skills/[skill-name]/evals.md
 git add docs/ARCHITECTURE.md CLAUDE.md
 # Add any updated existing skills
 git commit -m "feat: add [skill-name] — [one-line purpose]"
@@ -372,6 +403,8 @@ git commit -m "feat: add [skill-name] — [one-line purpose]"
 - [ ] Data flow mapped (Feeds Into / Fed By / Feedback Loops)
 - [ ] Self-Validation has 3-5 domain-specific checks (not generic)
 - [ ] Output format is structured and parseable by other skills
+- [ ] `evals.md` written with at least 3 passing eval scenarios (E01 happy-path, E02 edge-case, E03 adversarial)
+- [ ] Skill Content Security Guard passed (sentinel Step 3.5 — no destructive ops or injection patterns in SKILL.md)
 
 **Architecture:**
 - [ ] Layer assignment correct (L1=orchestrate, L2=workflow, L3=utility)

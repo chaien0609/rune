@@ -3,7 +3,7 @@ name: preflight
 description: Pre-commit quality gate that catches "almost right" code. Goes beyond linting — checks logic correctness, error handling, regressions, and completeness.
 metadata:
   author: runedev
-  version: "0.3.0"
+  version: "0.4.0"
   layer: L2
   model: sonnet
   group: quality
@@ -204,6 +204,36 @@ When a domain pack is installed (e.g., `@rune-pro/finance`, `@rune-pro/legal`), 
 - `src/billing/invoice.ts:42` — WARN: price calculation uses `toFixed(2)` instead of `Intl.NumberFormat`
 ```
 
+### Step 4.8 — Preflight Composite Score
+
+After all domain hooks (Step 4.5) and completeness checks (Step 4) complete, compute a **Preflight Health Score** to make the verdict numeric and comparable across runs.
+
+### Formula
+
+```
+Preflight Score = (Logic × 0.35) + (Error Handling × 0.25) + (Completeness × 0.25) + (Regression Risk × 0.15)
+```
+
+Each dimension is scored per staged files:
+- 0 BLOCK findings in dimension → 100
+- 1 BLOCK → dimension capped at 30
+- 1 WARN → dimension capped at 75
+- Each additional WARN → subtract 10 (floor: 40)
+
+### Grade Thresholds
+
+| Score | Grade | Verdict |
+|-------|-------|---------|
+| 90–100 | Excellent | PASS |
+| 75–89 | Good | PASS with notes |
+| 60–74 | Fair | WARN |
+| 40–59 | Poor | WARN (escalate to developer) |
+| 0–39 | Critical | BLOCK |
+
+Score is appended to the Preflight Report footer. Useful for tracking quality trend across sprints when cook logs preflight scores to `.rune/metrics/`.
+
+> Source: zubair-trabzada/geo-seo-claude (2.7k★) — weighted formula, 5-tier thresholds, comparable across runs.
+
 ### Step 5 — Security Sub-Check
 Invoke `rune:sentinel` on the changed files. Attach sentinel's output verbatim under the "Security" section of the preflight report. If sentinel returns BLOCK, preflight verdict is also BLOCK.
 
@@ -239,6 +269,10 @@ Report PASS, WARN, or BLOCK. For WARN, list each item the developer must acknowl
 
 ### Security (from sentinel)
 - [sentinel findings if any]
+
+### Composite Score
+- Logic: [score] | Error Handling: [score] | Completeness: [score] | Regression Risk: [score]
+- **Preflight Score**: [weighted value] → Grade: [Excellent/Good/Fair/Poor/Critical]
 
 ### Verdict
 WARN — 3 issues found (0 blocking, 3 must-acknowledge). Resolve before commit or explicitly acknowledge each WARN.

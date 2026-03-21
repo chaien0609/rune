@@ -3,7 +3,7 @@ name: plan
 description: Create structured implementation plans from requirements. Produces master plan + phase files for enterprise-scale project management. Master plan = overview (<80 lines). Phase files = execution detail (<150 lines each). Each session handles 1 phase. Uses opus for deep reasoning.
 metadata:
   author: runedev
-  version: "0.9.0"
+  version: "1.0.0"
   layer: L2
   model: opus
   group: creation
@@ -618,6 +618,40 @@ Max 200 lines. Self-contained — coder needs ONLY this file.
 - [risk]: [mitigation]
 ```
 
+## Outcome Block (Mandatory Plan Output Section)
+
+Every plan output — whether master plan, phase file, or inline plan — MUST end with an **Outcome Block**. This closes the loop between planning and execution.
+
+```markdown
+## Outcome Block
+
+### What Was Planned
+<1-2 sentences: what this plan delivers when all phases execute successfully>
+
+### Immediate Next Action
+<The SINGLE next action the executor should take right now — not a list, one action>
+Example: "Load phase 1 file and execute Wave 1 tasks (create types, validation schema)"
+
+### How to Measure Success
+| Metric | Target | How to Check |
+|--------|--------|-------------|
+| Tests pass | 100% green | `npm test` or `pytest -v` |
+| Type errors | 0 | `tsc --noEmit` or `mypy` |
+| Phase complete | All tasks ✅ | phase file task list |
+| <domain metric> | <value> | <command> |
+```
+
+**Why this matters**: Plans without a clear "what to do NOW" cause executor drift — agents re-read the plan, re-analyze, and pick arbitrary starting points. The Immediate Next Action eliminates ambiguity: there is exactly ONE right first move.
+
+**Rules:**
+1. Outcome Block is the LAST section in every plan output (master plan, phase file, inline plan)
+2. "Immediate Next Action" = ONE action, present tense, imperative mood. Not a list.
+3. "How to Measure" table MUST include at least one verifiable shell command
+4. For phase files: Immediate Next Action = "Execute Wave 1: [list Wave 1 task names]"
+5. For master plans: Immediate Next Action = "Await approval, then load phase 1 file"
+
+> Source: Affitor/affiliate-skills — every output ends with: outcome achieved + immediate next action + measurement metric ("What happened → What to do now → How to measure").
+
 ## Constraints
 
 1. MUST produce master plan + phase files for non-trivial tasks (3+ phases OR 5+ files OR 100+ LOC)
@@ -655,6 +689,8 @@ Max 200 lines. Self-contained — coder needs ONLY this file.
 | Plan ignores locked Decisions from BA | CRITICAL | Decision Compliance section cross-checks requirements.md — locked decisions are non-negotiable |
 | Complex feature missing Workflow Registry — components planned but never wired | HIGH | Step 4.5: 4-view registry catches orphaned components, unphased workflows, and missing state transitions before phase files are written |
 | Recommending shortcut approach without Completeness Score | MEDIUM | Step 5.5: every alternative needs X/10 Completeness score + dual effort estimate (human vs AI). "Saves 70 LOC" is not a reason when AI makes the delta cost minutes |
+| Plan output missing Outcome Block | MEDIUM | Every plan output MUST end with Outcome Block (What Was Planned + Immediate Next Action + How to Measure) — executor drift when omitted |
+| Outcome Block "Next Action" is a list, not one action | LOW | One action only — ambiguity about where to start causes re-analysis and lost context |
 
 ## Self-Validation
 
@@ -682,6 +718,8 @@ SELF-VALIDATION (run before presenting plan to user):
 - Master plan presented to user with "Awaiting Approval"
 - User has explicitly approved
 - Self-Validation: all checks passed
+- Outcome Block present in every plan output (master plan, phase files, inline plan)
+- Outcome Block contains: What Was Planned + Immediate Next Action (single action) + How to Measure table
 
 ## Cost Profile
 

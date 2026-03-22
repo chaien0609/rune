@@ -2,7 +2,6 @@
 
 Reference for Step 4b. Real-time command guard patterns for agent workflows.
 
-> Source: garrytan/gstack v0.9.0 (careful/freeze/guard skills) — real-time command safety, composable with edit scope lock.
 
 ## Pattern Table
 

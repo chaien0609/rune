@@ -47,6 +47,27 @@ if (pkg.version === plugin.version) {
   fail(`Version mismatch: package.json=${pkg.version} vs plugin.json=${plugin.version}`);
 }
 
+// 1b. Version in docs/content files
+const versionFiles = [
+  { path: 'docs/index.html', pattern: /v(\d+\.\d+\.\d+)\s*&mdash;/ },
+  { path: 'ROADMAP.md', pattern: /Version:\s*(\d+\.\d+\.\d+)/ },
+  { path: 'README.md', pattern: /What's New \(v(\d+\.\d+\.\d+)\)/ },
+];
+
+for (const { path, pattern } of versionFiles) {
+  const filePath = join(ROOT, path);
+  if (!existsSync(filePath)) continue;
+  const content = readFileSync(filePath, 'utf8');
+  const match = content.match(pattern);
+  if (!match) {
+    warn(`${path}: no version pattern found`);
+  } else if (match[1] !== pkg.version) {
+    fail(`${path}: shows v${match[1]}, expected v${pkg.version}`);
+  } else {
+    pass(`${path}: v${match[1]}`);
+  }
+}
+
 // 2. npm registry check (non-blocking, just warn)
 try {
   const npmVersion = execSync(`npm view ${pkg.name} version`, {

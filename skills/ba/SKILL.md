@@ -95,7 +95,6 @@ Choose the framework that fits the requirement type. Use it to STRUCTURE the 5 Q
 | **INVEST** | User stories for sprint-sized features | **I**ndependent, **N**egotiable, **V**aluable, **E**stimable, **S**mall, **T**estable |
 | **Jobs-to-be-Done** | Product features, user workflows | "When [situation], I want to [motivation] so I can [expected outcome]" |
 
-> Source: K-Dense claude-scientific-skills (literature-review PICO pattern), adapted for software BA.
 
 **PICO Example (data feature):**
 ```
@@ -158,7 +157,6 @@ When presenting options, alternatives, or scope decisions to the user, rate each
 
 **Anti-pattern**: "Choose B — it covers 90% of the value with less code." → If A is only 70 lines more, choose A. The last 10% is where production bugs hide.
 
-> Source: garrytan/gstack v0.9.0 — "Boil the Lake" principle. Completeness is cheap when AI makes the marginal cost near-zero.
 
 ### Step 4 — Scope Definition
 

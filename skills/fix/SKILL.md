@@ -121,7 +121,6 @@ When fix is called repeatedly (e.g., by cook Phase 4, or iterative fix loops), t
 - A full test suite run shows zero regressions
 - Scope is narrowed to a single file
 
-> Source: garrytan/gstack v0.9.0 (qa skill) — prevents runaway fix loops where each fix introduces new risk.
 
 ### Step 5: Post-Fix Hardening (Defense-in-Depth)
 

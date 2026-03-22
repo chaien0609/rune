@@ -40,6 +40,7 @@ Legacy refactoring orchestrator for safely modernizing messy codebases. Rescue r
 - `session-bridge` (L3): save rescue state between sessions
 - `onboard` (L2): generate context for unfamiliar legacy project
 - `dependency-doctor` (L3): audit dependencies in legacy project
+- `context-pack` (L3): create structured handoff briefings before spawning subagents
 - `neural-memory` | Phase start + phase end | Recall past refactoring patterns, capture new ones
 
 ## Called By (inbound)

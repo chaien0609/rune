@@ -66,7 +66,6 @@ Call `WebSearch` for each query. Collect result titles, URLs, and snippets. Iden
 - Relevance to the query
 - **Diversity: never select 3+ URLs from the same domain** — spread across source types
 
-> Source: K-Dense claude-scientific-skills (literature-review "minimum 3 complementary databases" pattern), adapted for software research.
 
 ### Step 3 — Deep Dive
 

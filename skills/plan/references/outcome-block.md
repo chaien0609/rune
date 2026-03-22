@@ -38,4 +38,3 @@ Example: "Load phase 1 file and execute Wave 1 tasks (create types, validation s
 
 Plans without a clear "what to do NOW" cause executor drift — agents re-read the plan, re-analyze, and pick arbitrary starting points. The Immediate Next Action eliminates ambiguity: there is exactly ONE right first move.
 
-> Source: Affitor/affiliate-skills — every output ends with: outcome achieved + immediate next action + measurement metric ("What happened → What to do now → How to measure").

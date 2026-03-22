@@ -29,3 +29,10 @@ docs/dashboard.html
 .env
 .env.local
 .gitnexus
+
+# Local tooling artifacts
+.claude/skills/
+.claude/settings.local.json
+AGENTS.md
+.openclaw/
+.cursor/

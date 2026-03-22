@@ -388,7 +388,6 @@ Each dimension is scored 0–100 based on findings count and severity:
 
 **When to include**: Only when `mode: "scored"` is passed by the caller, or when invoked by `audit`. Default review output uses the standard severity-ranked report without the score.
 
-> Source: zubair-trabzada/geo-seo-claude (2.7k★) — weighted composite formula, 5-tier grade thresholds.
 
 ## Severity Levels
 
@@ -440,7 +439,6 @@ Review commit: abc123 → Code changed to def456 → Review is STALE, re-review 
 
 When `cook` or `ship` checks review status: compare review commit hash with current HEAD. If different → WARN: "Review is stale — code changed since last review."
 
-> Source: garrytan/gstack v0.9.4 (50.9k★) — commit hash staleness tracking for reviews.
 
 ## Constraints
 

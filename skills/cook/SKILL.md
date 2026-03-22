@@ -388,7 +388,7 @@ Projects can define phase-specific rules in `.rune/phase-rules.md` that apply ON
 
 ## Checkpoint Protocol (Opt-In)
 
-Invoke `rune:session-bridge` after Phase 2, 4, and 5 to save intermediate state. OPT-IN — activate only if task spans 3+ phases, context-watch is ORANGE, or user explicitly requests checkpoints.
+Invoke `rune:session-bridge` after Phase 2, 4, and 5 to save intermediate state. OPT-IN — activate only if task spans 3+ phases, context-watch is ORANGE, or user explicitly requests checkpoints. Before spawning subagents, invoke `rune:context-pack` to create structured handoff briefings.
 
 ## Phase Transition Protocol (MANDATORY)
 
@@ -566,6 +566,7 @@ Mentally track tool call fingerprints. 3 identical calls → WARN. 5 identical c
 | 6 | `hallucination-guard` | L3 | Verify imports and API calls are real |
 | 7 | `journal` | L3 | Record architectural decisions |
 | 8 | `session-bridge` | L3 | Save context for future sessions |
+| any | `context-pack` | L3 | create structured handoff briefings before spawning subagents |
 | any | `skill-forge` | L2 | When new skill creation detected during cook |
 | 1.5 | L4 extension packs | L4 | Domain-specific patterns when stack matches |
 

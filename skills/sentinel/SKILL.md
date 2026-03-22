@@ -130,7 +130,6 @@ Scan changed files for SQL injection (string concat/interpolation in SQL) → **
 
 When invoked on `SKILL.md`, `extensions/*/PACK.md`, `.rune/*.md`, or agent files, scan content for 28 compiled regex rule categories BEFORE it is written or committed. First-match-wins — report the triggering category and halt. Safe exceptions apply for documented anti-pattern examples and scripts in `scripts/` directory. Invoke from `skill-forge` Phase 7 pre-ship check and from any hook writing to skill files.
 
-> Source: nextlevelbuilder/goclaw (832★)
 
 ### Step 4 — Destructive Command Guard
 <MUST-READ path="references/destructive-commands.md" trigger="Before static scan and before including real-time command guard in report — load pattern table and safe exceptions"/>

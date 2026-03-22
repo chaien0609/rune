@@ -113,7 +113,6 @@ Zero issues found = red flag — look harder, not a sign of quality.
 This prevents rubber-stamping where the gate confirms everything without scrutiny.
 </HARD-GATE>
 
-> Source: msitarzewski/agency-agents (50.8k★) — "Default to finding 3-5 issues. Zero issues = red flag, look harder."
 
 For each claim + evidence pair:
 

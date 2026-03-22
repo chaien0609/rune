@@ -9,7 +9,6 @@ Build this registry BEFORE writing phase files for complex features. It catches 
 
 **Skip conditions**: trivial tasks, inline plans, single-workflow features.
 
-> Source: agency-agents (msitarzewski/agency-agents, 50.8k★): "Every route is an entry point. Every worker is a workflow. If it's missing from the registry, it doesn't exist."
 
 ## 4-View Format
 

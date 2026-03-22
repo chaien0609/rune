@@ -265,7 +265,6 @@ Each dimension is scored per staged files:
 
 Score is appended to the Preflight Report footer. Useful for tracking quality trend across sprints when cook logs preflight scores to `.rune/metrics/`.
 
-> Source: zubair-trabzada/geo-seo-claude (2.7k★) — weighted formula, 5-tier thresholds, comparable across runs.
 
 ### Step 5 — Security Sub-Check
 Invoke `rune:sentinel` on the changed files. Attach sentinel's output verbatim under the "Security" section of the preflight report. If sentinel returns BLOCK, preflight verdict is also BLOCK.

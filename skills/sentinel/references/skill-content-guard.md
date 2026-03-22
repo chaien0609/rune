@@ -3,7 +3,6 @@
 Reference for Step 3.5. Scan SKILL.md and skill-adjacent content files BEFORE write/commit.
 First-match-wins — report the category that triggered and halt.
 
-> Source: nextlevelbuilder/goclaw (832★) — 28 compiled regex rules on skill content pre-write.
 
 ## Category Groups
 

@@ -312,7 +312,6 @@ At the end of a skill's workflow, skill-router MAY suggest a **complementary ski
 - User can disable with "no suggestions" or "just do what I asked"
 - Inside `cook` orchestration: skip recommendations — cook already manages transitions
 
-> Source: garrytan/gstack v0.9.1 (50.9k★) — one-hop skill chaining with proactive: false escape hatch.
 
 ## Output Format
 

@@ -98,6 +98,7 @@ Before decomposing, classify the task into a complexity tier. Each tier defines 
 - `completion-gate` (L3): validate workstream completion claims against evidence
 - `constraint-check` (L3): audit HARD-GATE compliance across parallel streams
 - `worktree` (L3): create isolated worktrees for parallel cook instances
+- `context-pack` (L3): create structured handoff briefings before spawning subagents
 - L4 extension packs: domain-specific patterns when context matches (e.g., @rune/mobile when porting web to mobile)
 
 ## Called By (inbound)

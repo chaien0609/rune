@@ -20,7 +20,6 @@ When presenting alternatives, rate each with **Completeness X/10**:
 - Show **dual effort estimates** for each approach: `(human: ~X / AI: ~Y)`
 - **Anti-pattern**: "Option B saves 70 LOC" → 70 LOC delta is meaningless with AI. Choose complete. The last 10% of coverage is where production bugs hide.
 
-> Source: garrytan/gstack v0.9.0 — "Boil the Lake" principle.
 
 ## Example Format
 

@@ -286,7 +286,6 @@ A skill is **behavior-tested** when it has evals covering:
 
 Save eval files as `skills/<name>/evals.md`. Each eval is a numbered scenario (E01–E24 range). skill-forge Phase 7 checks for evals presence before ship.
 
-> Source: PhucMPham/zalo-agent-cli (35★) — 24 eval scenario format (E01-E24) with Must Include / Must NOT assertions.
 
 ## Error Recovery
 
@@ -365,7 +364,6 @@ assert(result.output.includes(oracle), "Oracle not found — pipeline lost data"
 
 **When NOT to use**: Unit tests, simple CRUD, or when exact output comparison is feasible.
 
-> Source: airweave-ai/airweave (6k★) — Bongo oracle-injection pattern for pipeline E2E testing.
 
 ## Spec→Test Traceability
 

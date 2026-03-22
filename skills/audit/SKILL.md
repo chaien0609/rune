@@ -408,7 +408,6 @@ Mesh Analytics (Phase 8) is advisory — it contributes 0 to the weighted score 
 
 Security issues cause exponential blast — a 3/10 security score with all other dimensions at 9/10 = overall 72 (Fair), not 8.1 (Good). The formula ensures security and code quality dominate the verdict. Comparable across runs: if Overall moves from 68 → 74 after fixes, the project measurably improved.
 
-> Source: zubair-trabzada/geo-seo-claude (2.7k★) — explicit weighted formula with 5-tier grade thresholds.
 
 ## Severity Levels
 

@@ -83,7 +83,6 @@ After reproducing the error, **lock edits to the narrowest affected directory** 
 
 **Why:** Debugging naturally expands scope as you trace root causes. Without a boundary, rune:fix receives recommendations touching 10+ files across unrelated modules. The scope lock forces discipline: fix at the source, not at every symptom site.
 
-> Source: garrytan/gstack v0.9.0 (investigate skill) — auto-freeze to affected module during debug sessions.
 
 ### Step 2: Gather Evidence
 
@@ -271,7 +270,6 @@ Beyond counting reads, detect when debug is **re-gathering the same evidence wit
 | Environment | Wrong config, missing env var, version mismatch, path issue |
 | State | Stale cache, mutation side-effect, leaked reference, dangling connection |
 
-> Source: goclaw (832★) — content-aware loop detection adapted for debug hypothesis cycles.
 
 ## Red Flags — STOP and Return to Step 2
 

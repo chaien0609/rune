@@ -107,6 +107,15 @@ Called By ← mcp-builder (L2): when building Zalo-specific MCP server
 4. Credentials (tokens, cookies, secrets) MUST never be logged or committed
 5. Webhook signature verification MUST NOT be skipped — even in development
 
+## Sharp Edges
+
+| Failure Mode | Severity | Mitigation |
+|---|---|---|
+| OAuth2 access token expires (1h) without auto-refresh causing silent API failures | HIGH | Implement token refresh middleware that intercepts 401 responses and retries with new token before propagating errors |
+| zca-js session lost when running personal bot and Zalo app simultaneously on same account | HIGH | Use a dedicated account for bot automation — single-session limit is non-negotiable on Track B |
+| Webhook signature verification skipped in development, then deployed to production unsigned | HIGH | Always validate `X-Zalo-Signature` header from first commit — skip in dev only via explicit `SKIP_WEBHOOK_VERIFY=true` env flag |
+| Rate limit hit causes account ban with no warning (HTTP 429 mishandled as transient error) | HIGH | Implement token bucket per endpoint; treat sustained 429s as ban-risk signal and back off for 60+ seconds |
+
 ## Done When
 
 - OA OAuth2 flow working with auto-refresh
